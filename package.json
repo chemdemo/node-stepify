@@ -11,7 +11,9 @@
         "type": "git",
         "url": "https://github.com/chemdemo/node-task.git"
     },
-    "dependencies": {},
+    "dependencies": {
+        "debug": "~0.7.3"
+    },
     "keywords": [
         "flow-control", "task", "step", "async", "asynchronous", "chain"
     ]
