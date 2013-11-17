@@ -1,1 +1,1 @@
-module.exports = require('lib/tasks');
+module.exports = require('lib/taskQ');
