@@ -8,7 +8,7 @@ var zip = function() {
     ;
 };
 
-var task = 
+var task =
 Task()
     .register('exportHtml')
         .step('getWorkData')
@@ -35,7 +35,8 @@ Task()
     .getWorkData(getWorkData)
     // .thumb(thumb)
     // .mv(mv)
-    .zip(zip);
+    .zip(zip)
+    .result(fn);
     // .run();
 
 module.exports = function(req, res, next) {
