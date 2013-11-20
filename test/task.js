@@ -32,12 +32,12 @@ Task()
         .step('mv')
         .step('genPdf')
         .pend()
-    .getWorkData(getWorkData)
-    // .thumb(thumb)
-    // .mv(mv)
+    .getWorkData(getWorkData, workid)
+    .thumb(thumb)
+    .mv(mv)
     .zip(zip)
-    .result(fn);
-    // .run();
+    .finish(fn);
+    .run();
 
 module.exports = function(req, res, next) {
     var wid = req.query.wid;
