@@ -3,7 +3,6 @@ var Task = require('../lib/TaskMgr');
 var myTask = Task()
     .register('foo')
         .step(function() {
-            console.log(arguments);
             setTimeout(function() {
                 console.log('first');
                 this.done(null, 'first');
@@ -11,7 +10,6 @@ var myTask = Task()
         }, 10)
         .step('bar')
         .bar(function() {
-            console.log(arguments);
             setTimeout(function() {
                 console.log('second');
                 this.done(null, 'second');
