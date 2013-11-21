@@ -1,4 +1,4 @@
-var Task = require('../lib/task');
+var Task = require('../lib/TaskMgr');
 
 var mv = function(src, dist) {
     require('child_process').exec('mv ' + src + ' ' + dist, this.next);
