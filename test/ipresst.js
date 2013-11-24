@@ -23,12 +23,12 @@ Task()
         .pend()
     .register('exportImg')
         .step('getWorkData')
-        .step('thumb')
+        .step('thumb', 'png')
         .step('mv')
         .step('zip')
     .register('exportPdf')
         .step('getWorkData')
-        .step('thumb')
+        .step('thumb', 'png')
         .step('mv')
         .step('genPdf')
         .pend()
@@ -36,7 +36,7 @@ Task()
     .thumb(thumb)
     .mv(mv)
     .zip(zip)
-    .finish(fn);
+    .finish(fn)
     .run();
 
 module.exports = function(req, res, next) {
