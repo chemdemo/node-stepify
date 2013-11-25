@@ -13,19 +13,19 @@ var myTask = Task()
         }, 10)
         .step('bar', 1, 2)
         .bar(function(x, y) {
-            // console.log(x, y)
+            console.log(arguments)
             var root = this;
             setTimeout(function() {
                 // console.log('index:', root._index);
-                root.store('key', 100);
+                root.result('num', 100);
                 root.done(null, 'second');
             }, 500);
         })
         .step('x', function() {
             var root = this;
             setTimeout(function() {
-                console.log(root.store('key'));
-                return root.done('err~~~~');
+                console.log(root.result('num'));
+                // return root.done('err~~~~');
                 root.done(Math.random() > 0.5 ? null: 'Error!!!');
             }, 1000);
         })
@@ -38,8 +38,8 @@ var myTask = Task()
         .error(function(err) {
             console.log('has error: ', err);
         })
-    .finish(function() {
-        console.log('good!');
+    .finish(function(result) {
+        console.log(result);
     })
     .run();
 
