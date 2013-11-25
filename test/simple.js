@@ -38,17 +38,17 @@ var myTask = Task()
         .error(function(err) {
             console.log('has error: ', err);
         })
-    /*.finish(function() {
+    .finish(function() {
         console.log('good!');
     })
-    .run()*/;
+    .run();
 
-myTask.finish = function() {
-    console.log('good~~!');
-};
+// myTask.finish = function() {
+//     console.log('good~~!');
+// };
 
 // myTask.error = function(err) {
 //     console.log('has error: ', err);
 // };
 
-myTask.run();
+// myTask.run();
