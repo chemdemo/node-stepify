@@ -25,7 +25,7 @@ var myTask = Task()
             var root = this;
             setTimeout(function() {
                 console.log(root.result('num'));
-                // return root.done('err~~~~');
+                // return root.done('err1~~~~');
                 root.done(Math.random() > 0.5 ? null: 'Error!!!');
             }, 1000);
         })
@@ -35,9 +35,38 @@ var myTask = Task()
                 root.done(null, 'baz');
             }, 2000);
         })
+        .step('common')
         .error(function(err) {
             console.log('has error: ', err);
         })
+        .pend()
+    // .task('foo2')
+    //     .step('bar2')
+    //     .bar2(function() {
+    //         var root = this;
+    //         setTimeout(function() {
+    //             console.log(root.stepName, Date.now());
+    //             root.done(null);
+    //         }, 1000);
+    //     })
+    //     .step('common')
+    //     .step('err_test', function() {
+    //         console.log(arguments);
+    //         setTimeout(function() {
+    //             root.done('err_test!!!');
+    //         }, 800);
+    //     })
+    //     .pend()
+    .common(function() {
+        var root = this;
+        setTimeout(function() {
+            console.log(root.stepName, Date.now());
+            root.done(null);
+        }, 1000);
+    })
+    // .error(function(err) {
+    //     console.log('common error method:', err);
+    // })
     .finish(function(result) {
         console.log(result);
     })
