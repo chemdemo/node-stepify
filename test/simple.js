@@ -14,14 +14,14 @@ var myTask = Task()
             var root = this;
             setTimeout(function() {
                 // console.log('index:', root._index);
-                root.result('num', 100);
+                root.vars('num', 100);
                 root.done(null, 'second');
             }, 500);
         })
         .step('x', function() {
             var root = this;
             setTimeout(function() {
-                // console.log(root.result('num'));
+                // console.log(root.vars('num'));
                 // return root.done('err1~~~~');
                 return root.done(null, 'haha');
                 root.done(Math.random() > 0.5 ? null: 'Error!!!');
@@ -51,6 +51,7 @@ var myTask = Task()
         .step('common')
         // .step('err_test', function() {
         //     console.log(arguments);
+        //     var root = this;
         //     setTimeout(function() {
         //         root.done('err_test!!!');
         //     }, 800);
