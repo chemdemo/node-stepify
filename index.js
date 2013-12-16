@@ -1,10 +1,10 @@
 /**
- * Define the node-task library.
+ * Define the node-stepify library.
  * @author <a href="mailto:yangdemo@gmail.com">dmyang</a>
  * @version 0.0.1
  * @usage:
  * ``` js
- * require('node-tasks')()
+ * require('node-stepify')()
  *   .task('foo')
  *     .step('bar', fn, *args)
  *     .step('biz', *args)

@@ -1,3 +1,8 @@
-# node-task [![Build Status](https://api.travis-ci.org/chemdemo/node-task.png)](http://travis-ci.org/chemdemo/node-task)
+## node-stepify
+[![Build Status](https://api.travis-ci.org/chemdemo/node-stepify.png)](http://travis-ci.org/chemdemo/node-stepify)
 
-Execute asynchronous tasks step by step.
+Execute nodejs asynchronous tasks by steps chain.
+
+## License
+
+MIT [http://rem.mit-license.org](http://rem.mit-license.org)

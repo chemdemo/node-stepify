@@ -1,6 +1,6 @@
 {
-    "name": "node-task",
-    "description": "Execute asynchronous tasks step by step",
+    "name": "node-stepify",
+    "description": "Execute nodejs asynchronous tasks by steps chain",
     "version": "0.0.1",
     "engine": {
         "node": ">= 0.8.0"
@@ -9,13 +9,13 @@
     "author": "dmyang <yangdemo@gmail.com>",
     "repository": {
         "type": "git",
-        "url": "https://github.com/chemdemo/node-task.git"
+        "url": "https://github.com/chemdemo/node-stepify.git"
     },
     "dependencies": {
         "debug": "~0.7.3",
         "lodash": "~2.3.0"
     },
     "keywords": [
-        "flow-control", "task", "step", "async", "asynchronous", "chain"
+        "node-stepify", "flow-control", "stepify", "step", "async", "asynchronous", "chain"
     ]
 }
