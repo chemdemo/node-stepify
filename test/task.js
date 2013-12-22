@@ -414,6 +414,27 @@ describe('Stepify', function() {
                 })
                 .run();
         });
+
+        it('should', function(done) {
+            Stepify()
+                .task('foo')
+                    .step(function() {
+                        var root = this;
+                        setTimeout(function() {
+                            root.done(null);
+                        }, 300);
+                    })
+                    .step(function() {
+                        var root = this;
+                        fs.readFile(path.join(__dirname, 'not_exist.js'), function(err) {
+                            if(err) err = 'not_exist.js was not found.';
+                            root.done(err);
+                        });
+                    })
+                    .error(function(err) {
+                        err.should.equal('not_exist.js was not found.');
+                    })
+        });
     });
 
     describe('#finish()', function() {
