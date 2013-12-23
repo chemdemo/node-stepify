@@ -21,4 +21,4 @@
  * ```
  **/
 
-module.exports = require('lib/taskMgr');
+module.exports = require('lib/Stepify');
