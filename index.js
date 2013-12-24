@@ -21,4 +21,4 @@
  * ```
  **/
 
-module.exports = require('lib/Stepify');
+module.exports = require('./lib/Stepify');

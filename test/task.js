@@ -141,7 +141,7 @@ describe('Stepify', function() {
                     setTimeout(function() {
                         root.done(null, n);
                     }, 200);
-                });
+                })
                 .finish(function() {
                     done(null);
                 })
@@ -370,7 +370,7 @@ describe('Stepify', function() {
                                 root.done('There sth error.');
                             }, 100);
                         })
-                        .setp(function() {
+                        .step(function() {
                             var root = this;
                             setTimeout(function() {
                                 count++;
@@ -577,14 +577,14 @@ describe('Stepify', function() {
         });
 
         describe('executing tasks by the order customized', function() {
-            it('should execute by customized order', function(done) {
+            it('should execute without error when ordering with task name', function(done) {
                 Stepify()
                     .task('task1')
                         .step(function() {
                             var root = this;
-                            fs.readDir(__dirname, function(err) {
+                            fs.readdir(__dirname, function(err) {
                                 if(err) throw err;
-                                root.fulfill('task1.step1');
+                                root.fulfill(root._taskName + '.step1');
                                 root.done(null);
                             });
                         })
@@ -595,7 +595,7 @@ describe('Stepify', function() {
                         .step(function() {
                             var root = this;
                             setTimeout(function() {
-                                root.fulfill('task2.step2');
+                                root.fulfill(root._taskName + '.step2');
                                 root.done(null);
                             }, 300);
                         })
@@ -605,7 +605,7 @@ describe('Stepify', function() {
                         .step('timer', function() {
                             var root = this;
                             setTimeout(function() {
-                                root.fulfill('task3.step2');
+                                root.fulfill(root._taskName + '.step2');
                                 root.done(null);
                             }, 300);
                         })
@@ -617,15 +617,6 @@ describe('Stepify', function() {
                                 root.fulfill('readFile.' + p);
                                 root.done(null);
                             });
-                        })
-                    .task('task4')
-                        .step('sleep')
-                        .step('timer', function() {
-                            var root = this;
-                            setTimeout(function() {
-                                root.fulfill('task3.step2');
-                                root.done(null);
-                            }, 100);
                         })
                     .sleep(function() {
                         var root = this;
@@ -644,15 +635,148 @@ describe('Stepify', function() {
                         });
                     })
                     .finish(function(r) {
-                        r.should.equal([
+                        r.should.eql([
                             'task1.step1', 'task1.sleep', 'exec.cat.' + __filename,
                             'readFile.' + __filename, 'task3.step2', 'task3.sleep',
-                            'task4.sleep', 'task3.step2',
                             'task2.sleep', 'task2.step2', 'exec.ls.-l'
                         ]);
                         done(null);
                     })
-                    .run('task1', ['task3', 'task4'], 'task2');
+                    .run('task1', 'task3', 'task2');
+            });
+
+            it('should execute without error when ordering with task index', function(done) {
+                Stepify()
+                    .task()
+                        .step(function() {
+                            var root = this;
+                            fs.readdir(__dirname, function(err) {
+                                if(err) throw err;
+                                root.fulfill(root._taskName + '.step1');
+                                root.done(null);
+                            });
+                        })
+                        .step('sleep')
+                        .step('exec', 'cat', __filename)
+                    .task()
+                        .step('sleep')
+                        .step(function() {
+                            var root = this;
+                            setTimeout(function() {
+                                root.fulfill(root._taskName + '.step2');
+                                root.done(null);
+                            }, 300);
+                        })
+                        .step('exec', 'ls', '-l')
+                    .task()
+                        .step('readFile', __filename)
+                        .step('timer', function() {
+                            var root = this;
+                            setTimeout(function() {
+                                root.fulfill(root._taskName + '.step2');
+                                root.done(null);
+                            }, 300);
+                        })
+                        .step('sleep')
+                        .readFile(function(p) {
+                            var root = this;
+                            fs.readFile(p, function(err) {
+                                if(err) throw err;
+                                root.fulfill('readFile.' + p);
+                                root.done(null);
+                            });
+                        })
+                    .sleep(function() {
+                        var root = this;
+                        setTimeout(function() {
+                            root.fulfill(root._task._taskName + '.sleep');
+                            root.done(null);
+                        }, 200);
+                    })
+                    .exec(function(cmd) {
+                        cmd = [].slice.call(cmd, 0);
+                        var root = this;
+                        exec(cmd.join(' '), function(err) {
+                            if(err) throw err;
+                            root.fulfill('exec.' + cmd.join('.'));
+                            root.done(null);
+                        });
+                    })
+                    .finish(function(r) {
+                        r.should.eql([
+                            'task1.step1', 'task1.sleep', 'exec.cat.' + __filename,
+                            'readFile.' + __filename, 'task3.step2', 'task3.sleep',
+                            'task2.sleep', 'task2.step2', 'exec.ls.-l'
+                        ]);
+                        done(null);
+                    })
+                    .run(0, 2, 1);
+            });
+
+            it('should execute without error when ', function(done) {
+                Stepify()
+                    .task('task1')
+                        .step(function() {
+                            var root = this;
+                            fs.readdir(__dirname, function(err) {
+                                if(err) throw err;
+                                root.done(null);
+                            });
+                        })
+                        .step('sleep')
+                        .step('exec', 'cat', __filename)
+                    .task('task2')
+                        .step('sleep')
+                        .step(function() {
+                            var root = this;
+                            setTimeout(function() {
+                                root.done(null);
+                            }, 300);
+                        })
+                        .step('exec', 'ls', '-l')
+                    .task('task3')
+                        .step('readFile', __filename)
+                        .step('timer', function() {
+                            var root = this;
+                            setTimeout(function() {
+                                root.done(null);
+                            }, 300);
+                        })
+                        .step('sleep')
+                        .readFile(function(p) {
+                            var root = this;
+                            fs.readFile(p, function(err) {
+                                if(err) throw err;
+                                root.done(null);
+                            });
+                        })
+                    .task('task4')
+                        .step('sleep')
+                        .step(function() {
+                            var root = this;
+                            fs.readFile(p, function(err) {
+                                if(err) throw err;
+                                root.done(null);
+                            });
+                        })
+                    .sleep(function() {
+                        var root = this;
+                        setTimeout(function() {
+                            root.done(null);
+                        }, 200);
+                    })
+                    .exec(function(cmd) {
+                        cmd = [].slice.call(cmd, 0);
+                        var root = this;
+                        exec(cmd.join(' '), function(err) {
+                            if(err) throw err;
+                            root.done(null);
+                        });
+                    })
+                    .finish(function(r) {
+                        done(null);
+                    })
+                    .run('task1', ['task4', 'task3'], 'task2');
             });
         });
     });

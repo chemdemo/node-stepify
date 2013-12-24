@@ -1,13 +1,14 @@
-var Task = require('../lib/TaskMgr');
+var Task = require('../index');
 
 var myTask = Task()
     // .debug(true)
     .task('foo')
         .step(function() {
             var root = this;
-            setTimeout(function() {
-                root.done(null, 'first');
-            }, 1000);
+            // setTimeout(function() {
+            //     root.done(null, 'first');
+            // }, 1000);
+            require('fs').readdir(__dirname, this.done.bind(this));
         }, 10)
         .step('bar', 1, 2)
         .bar(function() {
