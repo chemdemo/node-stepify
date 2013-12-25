@@ -11,7 +11,7 @@ var myTask = Task()
             require('fs').readdir(__dirname, this.done.bind(this));
         }, 10)
         .step('bar', 1, 2)
-        .bar(function() {
+        .bar(function(x, y) {
             console.log([].slice.call(arguments, 0)) // [1, 2, 'first']
             var root = this;
             setTimeout(function() {

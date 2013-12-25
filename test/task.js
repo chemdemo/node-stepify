@@ -45,7 +45,7 @@ describe('Stepify', function() {
                         }, 300);
                     })
                     .step('readFile', function(str) {
-                        fs.readFile(__filename, this.done);
+                        fs.readFile(__filename, this.done.bind(this));
                     })
                 .finish(function() {
                     done(null);
@@ -64,7 +64,7 @@ describe('Stepify', function() {
                     }, 300);
                 })
                 .step('readFile', function(str) {
-                    fs.readFile(__filename, this.done);
+                    fs.readFile(__filename, this.done.bind(this));
                 })
                 .finish(function() {
                     done(null);
@@ -76,7 +76,7 @@ describe('Stepify', function() {
             Stepify()
                 .task('task1')
                     .step(function() {
-                        fs.readFile(__filename, this.done);
+                        fs.readFile(__filename, this.done.bind(this));
                     })
                     .step('timer')
                     .timer(function() {
@@ -93,7 +93,7 @@ describe('Stepify', function() {
                         }, 100);
                     })
                     .step(function() {
-                        fs.readFile(__filename, this.done);
+                        fs.readFile(__filename, this.done.bind(this));
                     })
                 .finish(function() {
                     done(null);
@@ -104,27 +104,45 @@ describe('Stepify', function() {
 
     describe('#step()', function() {
         it('should throw error if nothing has been accessed to step()', function() {
-            Stepify().step().should.throw('Step handle should be accessed.');
+            (function() {
+                Stepify()
+                    .step()
+                    .run();
+            }).should.throw('Step handle should be accessed.');
         });
 
         it('should throw error if the accessed `stepName` was preset within the construtor', function() {
             var inserts = ['debug', 'task', 'step', 'pend', 'error', 'timeout', 'finish', 'run'];
             var name = inserts[Math.floor(Math.random()*inserts.length)];
-            Stepify().step(name).should.throw('The name `' + name + '` was preset within the construtor, \
-                try another one?');
+            (function() {
+                Stepify()
+                    .step(name)
+                    .run();
+            }).should.throw('The name `' + name + '` was preset within the construtor, try another one?');
         });
 
-        it('should execute without error even if `stepName` \
-            param has not accessed into step() method', function(done) {
+        it('should execute without error even if `stepName` param has not accessed into step() method', function(done) {
             Stepify()
                 .step(function() {
                     this._stepName.should.equal('_UNAMED_STEP_0');
+                    var root = this;
+                    setTimeout(function() {
+                        root.done(null);
+                    }, 100);
                 })
                 .step('foo', function() {
                     this._stepName.should.equal('foo');
+                    var root = this;
+                    setTimeout(function() {
+                        root.done(null);
+                    }, 200);
                 })
                 .step(function() {
                     this._stepName.should.equal('_UNAMED_STEP_2');
+                    var root = this;
+                    setTimeout(function() {
+                        root.done(null);
+                    }, 120);
                 })
                 .finish(function() {
                     done(null);
@@ -132,15 +150,18 @@ describe('Stepify', function() {
                 .run();
         });
 
-        it('should execute without error even if stepHandle defined \
-            after `step(stepName)` called', function(done) {
+        it('should execute without error even if stepHandle defined after `step(stepName)` called', function(done) {
             Stepify()
-                .step('foo')
-                .foo(function() {
+                .step('foo', 123)
+                .foo(function(n) {
                     var root = this;
                     setTimeout(function() {
                         root.done(null, n);
                     }, 200);
+                })
+                .step(function(n) {
+                    n.should.equal(123);
+                    this.done(null);
                 })
                 .finish(function() {
                     done(null);
@@ -182,10 +203,10 @@ describe('Stepify', function() {
                 })
             .finish(function() {
                 steps.should.have.length(4);
-                steps.should.eql(['step1', 'step2', 'ster3', 'step4']);
+                steps.should.eql(['step1', 'step2', 'step3', 'step4']);
                 done(null);
             })
-            run();
+            .run();
         });
 
         it('should support multiply tasks and multiply steps to be added', function(done) {
@@ -206,14 +227,14 @@ describe('Stepify', function() {
                             root.done(null, n);
                         }, 200);
                     })
-                .task2()
+                .task()
                     .step('task2_step1', function() {
                         n++;
-                        fs.exists(__dirname, this.done);
+                        fs.readdir(__dirname, this.done.bind(this));
                     })
                     .step('task2_step2', function() {
                         n++;
-                        fs.stat(__dirname, this.done);
+                        fs.stat(__dirname, this.done.bind(this));
                     })
                 .finish(function() {
                     n.should.equal(4);
@@ -222,8 +243,7 @@ describe('Stepify', function() {
                 .run();
         });
 
-        it('should support common stepHandle which defined after task pended\
-            when multiply tasks added', function(done) {
+        it('should support common stepHandle which defined after task pended when multiply tasks added', function(done) {
             var testStr = fs.readFileSync(__filename).toString();
             var indexStr = fs.readFileSync(path.resolve(__dirname, '../index.js')).toString();
 
@@ -247,6 +267,7 @@ describe('Stepify', function() {
                             root.done(null);
                         }, 100);
                     })
+                .pend()
                 .readFile(function(p) {
                     var root = this;
                     fs.readFile(p, function(err, str) {
@@ -275,7 +296,7 @@ describe('Stepify', function() {
                     fileStr[0].should.equal(testStr);
                     fileStr[1].should.equal(indexStr);
                     statCount.should.equal(2);
-                    timerArr.should.eql([200, 100]).have.length(2);
+                    timerArr.should.eql([200, 100]);
                     done(null);
                 })
                 .run();
@@ -303,14 +324,14 @@ describe('Stepify', function() {
                 .run();
         });
 
-        it('should be a multiply workflow after using `pend()` to split steps', function() {
+        it('should be a multiply workflow after using `pend()` to split steps', function(done) {
             var taskNames = [];
             Stepify()
                 .step(function() {
                     var name = this._task._taskName;
                     var root = this;
                     setTimeout(function() {
-                        if(taskNames.indexOf(_taskName) !== -1) {
+                        if(taskNames.indexOf(name) === -1) {
                             taskNames.push(name);
                         }
                         root.done(null);
@@ -321,7 +342,7 @@ describe('Stepify', function() {
                     var root = this;
                     fs.readFile(__filename, function(err) {
                         if(err) throw err;
-                        if(taskNames.indexOf(_taskName) !== -1) {
+                        if(taskNames.indexOf(name) === -1) {
                             taskNames.push(name);
                         }
                         root.done(null);
@@ -333,7 +354,7 @@ describe('Stepify', function() {
                     var root = this;
                     fs.stat(__dirname, function(err) {
                         if(err) throw err;
-                        if(taskNames.indexOf(_taskName) !== -1) {
+                        if(taskNames.indexOf(name) === -1) {
                             taskNames.push(name);
                         }
                         root.done(null);
@@ -342,143 +363,141 @@ describe('Stepify', function() {
                 .finish(function() {
                     taskNames.should.have.length(2);
                     taskNames[0].should.not.equal(taskNames[1]);
-                    done(null);
+                    done();
                 })
                 .run();
         });
     });
 
     describe('#error()', function() {
-        describe('use default errorHandle case', function() {
-            var count = 0;
+        var c1 = 0, c2 = 0, c3 = 0;
+        var flag = 0;
 
+        /*describe('use default errorHandle case', function() {
             it('should simplily throw error if error method has not defined for task', function(done) {
                 (function() {
                     Stepify()
-                        .setp(function() {
+                        .step(function() {
                             var root = this;
                             setTimeout(function() {
-                                count++;
+                                c1++;
                                 root.done(null);
                             }, 200);
                         })
                         .step(function() {
                             var root = this;
                             setTimeout(function() {
-                                count++;
-                                done(null);
-                                root.done('There sth error.');
+                                c1++;
+                                done();
+                                root.done('There sth error!');
                             }, 100);
                         })
                         .step(function() {
                             var root = this;
                             setTimeout(function() {
-                                count++;
+                                c1++;
                                 root.done(null);
                             }, 300);
                         })
                         .run();
-                }()).should.throw('There sth error.');
-            });
-
-            after(function() {
-                count.should.equal(2);
+                }).should.throw('There sth error!');
             });
         });
 
-        it('should access error to `error()` method witch defined manually', function(done) {
-            var count = 0;
-            var flag = 0;
-            Stepify()
-                .setp(function() {
-                    var root = this;
-                    setTimeout(function() {
-                        count++;
-                        root.done(null);
-                    }, 200);
-                })
-                .step(function() {
-                    var root = this;
-                    setTimeout(function() {
-                        count++;
-                        root.done('There sth error.');
-                    }, 100);
-                })
-                .setp(function() {
-                    var root = this;
-                    setTimeout(function() {
-                        count++;
-                        root.done(null);
-                    }, 300);
-                })
-                .error(function(err) {
-                    flag++;
-                    err.should.equal('There sth error.');
-                    count.should.equal(2);
-                    // flag.should.equal(1);
-                    done(null);
-                })
-                .run();
+        after(function() {
+            c1.should.equal(2);
+        });*/
 
-            after(function() {
-                // Is `after()` can be used after `it()` called ?
-                flag.should.equal(1);
+        describe('use customed errorHandle case', function() {
+            it('should access error to `error()` method witch defined manually', function(done) {
+                Stepify()
+                    .step(function() {
+                        var root = this;
+                        setTimeout(function() {
+                            c2++;
+                            root.done(null);
+                        }, 200);
+                    })
+                    .step(function() {
+                        var root = this;
+                        setTimeout(function() {
+                            c2++;
+                            root.done('There sth error...');
+                        }, 100);
+                    })
+                    .step(function() {
+                        var root = this;
+                        setTimeout(function() {
+                            c2++;
+                            root.done(null);
+                        }, 300);
+                    })
+                    .error(function(err) {
+                        flag++;
+                        err.should.equal('There sth error...');
+                        c2.should.equal(2);
+                        // flag.should.equal(1);
+                        done();
+                    })
+                    .run();
             });
         });
 
-        describe('multiply tasks and add errorHandle manually for some tasks case', function() {
-            var count = 0;
+        after(function() {
+            // Is `after()` can be used after `it()` called ?
+            flag.should.equal(1);
+        });
 
-            it('all tasks stop executing immediate error occured', function(done) {
-                (function() {
-                    Stepify()
-                        .task('foo')
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    count++;
-                                    root.done(null);
-                                }, 300);
-                            })
-                            .step(function() {
-                                var root = this;
-                                fs.readFile(path.join(__dirname, 'not_exist.js'), function(err) {
-                                    count++;
-                                    if(err) err = 'The file not_exist.js was not found.';
-                                    root.done(err);
-                                });
-                            })
-                            .error(function(err) {
-                                err.should.equal('The file not_exist.js was not found.');
-                            })
-                        .pend()
-                        .task('bar')
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    count++;
-                                    root.done(null);
-                                }, 300);
-                            })
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    count++;
-                                    root.done('should not executed ever.');
-                                }, 100);
-                            })
-                        .run()
-                }).should.throw('not_exist.js was not found.');
+        describe('use customed errorHandle and multiply tasks case', function() {
+            it('should stop executing immediate error occured', function(done) {
+                Stepify()
+                    .task('foo')
+                        .step(function() {
+                            var root = this;
+                            setTimeout(function() {
+                                c3++;
+                                root.done(null);
+                            }, 300);
+                        })
+                        .step(function() {
+                            var root = this;
+                            fs.readFile(path.join(__dirname, 'not_exist.js'), function(err) {
+                                c3++;
+                                if(err) err = 'The file not_exist.js was not found.';
+                                root.done(err);
+                            });
+                        })
+                        .error(function(err) {
+                            err.should.equal('The file not_exist.js was not found.');
+                            done();
+                        })
+                    .pend()
+                    .task('bar')
+                        .step(function() {
+                            var root = this;
+                            setTimeout(function() {
+                                c3++;
+                                root.done(null);
+                            }, 300);
+                        })
+                        .step(function() {
+                            var root = this;
+                            setTimeout(function() {
+                                c3++;
+                                root.done('should not executed ever.');
+                            }, 100);
+                        })
+                    .run()
             });
+        });
 
-            after(function() {
-                count.should.equal(2);
-            });
+        after(function() {
+            c3.should.equal(2);
         });
     });
 
     describe('#finish()', function() {
-        it('finish() should execute after all tasks finish without error', function(done) {
+        it('should execute after all tasks finish without error', function(done) {
             var flag = 0;
 
             Stepify()
@@ -496,12 +515,13 @@ describe('Stepify', function() {
                             if(err) return root.done(err);
                             str = str.toString();
                             root.fulfill(str);
-                            root.done(null);
+                            root.done();
                         });
                     })
                 .finish(function(result) {
                     result.should.eql([100, fs.readFileSync(__filename).toString()]);
                     flag = 1;
+                    done();
                 })
                 .run();
         });
@@ -511,6 +531,7 @@ describe('Stepify', function() {
             var finishHandle = function(result) {
                 result.should.eql([100, fs.readFileSync(__filename).toString()]);
                 flag = 1;
+                done(null);
             };
 
             Stepify(finishHandle)
@@ -549,11 +570,11 @@ describe('Stepify', function() {
                         }, 100);
                     })
                     .step(function() {
-                        fs.readFile(__filename, this.done);
+                        fs.readFile(__filename, this.done.bind(this));
                     })
                     .task()
                         .step('readFile', function() {
-                            fs.readFile(__filename, this.done);
+                            fs.readFile(__filename, this.done.bind(this));
                         })
                         .step('timer', 300)
                     .timer(function(timeout) {
