@@ -1,19 +1,24 @@
 {
-    "name": "node-stepify",
+    "name": "stepify",
     "description": "Execute nodejs asynchronous tasks by steps chain",
-    "version": "0.0.1",
+    "version": "0.1.1",
     "engine": {
         "node": ">= 0.8.0"
     },
-    "main": "./index.js",
+    "scripts": {
+        "test": "mocha test/index"
+    },
+    "main": "./index",
     "author": "dmyang <yangdemo@gmail.com>",
     "repository": {
         "type": "git",
         "url": "https://github.com/chemdemo/node-stepify.git"
     },
     "dependencies": {
-        "debug": "~0.7.3",
         "lodash": "~2.3.0"
+    },
+    "devDependencies": {
+        "mocha": "~1.16.2"
     },
     "keywords": [
         "node-stepify", "flow-control", "stepify", "step", "async", "asynchronous", "chain"
