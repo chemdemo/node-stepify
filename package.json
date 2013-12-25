@@ -18,7 +18,8 @@
         "lodash": "~2.3.0"
     },
     "devDependencies": {
-        "mocha": "~1.16.2"
+        "mocha": "~1.16.2",
+        "should": "~2.1.1"
     },
     "keywords": [
         "node-stepify", "flow-control", "stepify", "step", "async", "asynchronous", "chain"
