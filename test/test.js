@@ -22,7 +22,7 @@ describe('#error()', function() {
                     // d.exit();
                 };
 
-                d.once('error', errHandle);
+                d.on('error', errHandle);
 
                 // d.intercept(function() {
                 //     Stepify()
@@ -120,7 +120,7 @@ describe('#error()', function() {
                     // d.exit();
                 };
 
-                d.once('error', errHandle);
+                d.on('error', errHandle);
 
                 // d.intercept(function() {
                 //     Stepify()
