@@ -10,6 +10,9 @@ describe('#error()', function() {
         var d = domain.create();
 
         describe('use default errorHandle case', function() {
+            // node v0.8 has bug with doman module
+            if(process.version.match(/v0.8/)) return;
+
             it('should simplily throw error if error method has not defined for task', function(done) {
                 var errHandle = function(err) {
                     err.message.should.equal('There sth error!');
@@ -108,6 +111,9 @@ describe('#error()', function() {
         });
 
         describe('use customed errorHandle and multiply tasks case', function() {
+            // node v0.8 has bug with doman module
+            if(process.version.match(/v0.8/)) return;
+            
             it('should stop executing immediate error occured', function(done) {
                 var errHandle = function(err) {
                     err.message.should.equal('The file not_exist.js was not found.');
