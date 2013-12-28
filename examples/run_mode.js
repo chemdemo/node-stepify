@@ -97,7 +97,7 @@ var test = module.exports = function() {
     Object.keys(modes).forEach(function(mode) {
         task = createTask();
 
-        task.finish = function() {
+        task.result = function() {
             log(mode + ' mode finished and took %d ms.', Date.now() - t);
         };
 

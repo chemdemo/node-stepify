@@ -73,12 +73,12 @@ var myTask = Task()
     .error(function(err) {
         console.log('Error in common error method:', err);
     })
-    .finish(function(result) {
-        console.log(result); // 500
+    .result(function(r) {
+        console.log(r); // 500
     })
     .run();
 
-// myTask.finish = function() {
+// myTask.result = function() {
 //     console.log('good~~!');
 // };
 
