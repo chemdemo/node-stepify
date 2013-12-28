@@ -6,7 +6,7 @@
         "node": ">= 0.8.0"
     },
     "scripts": {
-        "test": "mocha test/index"
+        "test": "mocha --reporter spec"
     },
     "main": "./index",
     "author": "dmyang <yangdemo@gmail.com>",
