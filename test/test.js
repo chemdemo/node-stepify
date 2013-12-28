@@ -23,32 +23,6 @@ describe('#error()', function() {
 
                 d.on('error', errHandle);
 
-                /*d.intercept(function() {
-                    Stepify()
-                        .step(function() {
-                            var root = this;
-                            setTimeout(function() {
-                                c1++;
-                                root.done(null);
-                            }, 200);
-                        })
-                        .step(function() {
-                            var root = this;
-                            setTimeout(function() {
-                                c1++;
-                                root.done('There sth error!');
-                            }, 100);
-                        })
-                        .step(function() {
-                            var root = this;
-                            setTimeout(function() {
-                                c1++;
-                                root.done(null);
-                            }, 300);
-                        })
-                        .run();
-                })();*/
-
                 d.run(function() {
                     Stepify()
                         .step(function() {
@@ -113,7 +87,7 @@ describe('#error()', function() {
         describe('use customed errorHandle and multiply tasks case', function() {
             // node v0.8 has bug with doman module
             if(process.version.match(/v0.8/)) return;
-            
+
             it('should stop executing immediate error occured', function(done) {
                 var errHandle = function(err) {
                     err.message.should.equal('The file not_exist.js was not found.');
@@ -123,46 +97,6 @@ describe('#error()', function() {
                 };
 
                 d.on('error', errHandle);
-
-                /*d.intercept(function() {
-                    Stepify()
-                        .task('foo')
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    c3++;
-                                    root.done(null);
-                                }, 300);
-                            })
-                            .step(function() {
-                                var root = this;
-                                fs.readFile(path.join(__dirname, 'not_exist.js'), function(err) {
-                                    c3++;
-                                    if(err) err = 'The file not_exist.js was not found.';
-                                    root.done(err);
-                                });
-                            })
-                            .error(function(err) {
-                                throw new Error('The file not_exist.js was not found.');
-                            })
-                        .pend()
-                        .task('bar')
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    c3++;
-                                    root.done(null);
-                                }, 300);
-                            })
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    c3++;
-                                    root.done('should not executed ever.');
-                                }, 100);
-                            })
-                        .run();
-                })();*/
 
                 d.run(function() {
                     Stepify()
