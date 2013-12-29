@@ -375,7 +375,7 @@ describe('Stepify', function() {
         var d = domain.create();
 
         describe('use default errorHandle case', function() {
-            // node v0.8 has bug with doman module
+            // mocha can not caught errors when working with node v0.8.x
             if(process.version.match(/v0.8/)) return;
 
             it('should simplily throw error if error method has not defined for task', function(done) {
@@ -450,7 +450,7 @@ describe('Stepify', function() {
         });
 
         describe('use customed errorHandle and multiply tasks case', function() {
-            // node v0.8 has bug with doman module
+            // mocha can not caught errors when working with node v0.8.x
             if(process.version.match(/v0.8/)) return;
 
             it('should stop executing immediate error occured', function(done) {
