@@ -5,138 +5,99 @@ var path = require('path');
 var domain = require('domain');
 var exec = require('child_process').exec;
 
-describe('#error()', function() {
-        var c1 = 0, c2 = 0, c3 = 0;
-        var d = domain.create();
+describe('#parallel()', function() {
+        var index = path.resolve(__dirname, '../index.js');
+        var files = [index, __filename];
+        var exed = [];
 
-        describe('use default errorHandle case', function() {
-            // node v0.8 has bug with doman module
-            if(process.version.match(/v0.8/)) return;
+        it('should support parallel(arr, iterator[, callback]) mode', function(done) {
+            Stepify()
+                .step('a', function() {
+                    exed.push(this._stepName);
+                    this.parallel(files, fs.readFile, {encoding: 'utf8'});
+                })
+                .step('b', function(list) {
+                    exed.push(this._stepName);
 
-            it('should simplily throw error if error method has not defined for task', function(done) {
-                var errHandle = function(err) {
-                    err.message.should.equal('There sth error!');
+                    list.should.have.length(2);
+                    list[0].toString().should.equal(fs.readFileSync(index).toString());
+                    list[1].toString().should.equal(fs.readFileSync(__filename).toString());
+
+                    this.parallel(files, fs.readFile, {encoding: 'utf8'}, this.done);
+                })
+                .step('c', function(list) {
+                    list.should.have.length(2);
+                    list[0].toString().should.equal(fs.readFileSync(index).toString());
+                    list[1].toString().should.equal(fs.readFileSync(__filename).toString());
+
+                    this.parallel(files, fs.readFile, function(err, results) {
+                        if(err) this.end(err);
+                        exed.push(this._stepName);
+                        results.should.be.an.Array;
+                        this.next(results);
+                    });
+                })
+                .step('d', function(list) {
+                    list.should.have.length(2);
+                    list[0].toString().should.equal(fs.readFileSync(index).toString());
+                    list[1].toString().should.equal(fs.readFileSync(__filename).toString());
+
+                    var root = this;
+
+                    setTimeout(function() {
+                        exed.push(root._stepName);
+                        root.done();
+                    }, 300);
+                })
+                .result(function() {
+                    exed.should.eql(['a', 'b', 'c', 'd']);
                     done();
-                    d.removeListener('error', errHandle);
-                    d.exit();
-                };
-
-                d.on('error', errHandle);
-
-                d.run(function() {
-                    Stepify()
-                        .step(function() {
-                            var root = this;
-                            setTimeout(function() {
-                                c1++;
-                                root.done(null);
-                            }, 200);
-                        })
-                        .step(function() {
-                            var root = this;
-                            setTimeout(function() {
-                                c1++;
-                                root.done('There sth error!');
-                            }, 100);
-                        })
-                        .step(function() {
-                            var root = this;
-                            setTimeout(function() {
-                                c1++;
-                                root.done(null);
-                            }, 300);
-                        })
-                        .run();
-                });
-            });
+                })
+                .run();
         });
 
-        describe('use customed errorHandle case', function() {
-            it('should access error to `error()` method witch defined manually', function(done) {
-                Stepify()
-                    .step(function() {
-                        var root = this;
-                        setTimeout(function() {
-                            c2++;
-                            root.done(null);
-                        }, 200);
-                    })
-                    .step(function() {
-                        var root = this;
-                        setTimeout(function() {
-                            c2++;
-                            root.done('There sth error...');
-                        }, 100);
-                    })
-                    .step(function() {
-                        var root = this;
-                        setTimeout(function() {
-                            c2++;
-                            root.done(null);
-                        }, 300);
-                    })
-                    .error(function(err) {
-                        err.should.equal('There sth error...');
-                        c2.should.equal(2);
-                        done();
-                    })
-                    .run();
-            });
-        });
+        it('should support parallel(fnArr[, callback]) mode', function(done) {
+            Stepify()
+                .step('a', function() {
+                    this.parallel([
+                        function(callback) {
+                            fs.readFile(__filename, callback);
+                        },
+                        function(callback) {
+                            setTimeout(function() {
+                                callback(null, 'timer return');
+                            }, 500);
+                        }
+                    ]);
+                })
+                .step('b', function(r) {
+                    r.should.be.an.Array;
+                    r.should.have.length(2);
+                    r[0].toString().should.equal(fs.readFileSync(__filename).toString());
+                    r[1].should.equal('timer return');
 
-        describe('use customed errorHandle and multiply tasks case', function() {
-            // node v0.8 has bug with doman module
-            if(process.version.match(/v0.8/)) return;
+                    this.parallel([
+                        function(callback) {
+                            fs.readFile(index, callback);
+                        },
+                        function(callback) {
+                            setTimeout(function() {
+                                callback(null, 'timer2 return');
+                            }, 500);
+                        }
+                    ], function(err, results) {
+                        if(err) throw err;
+                        this.next(results);
+                    });
+                })
+                .step('c', function(r) {
+                    r.should.be.an.Array;
+                    r.should.have.length(2);
+                    r[0].toString().should.equal(fs.readFileSync(index).toString());
+                    r[1].should.equal('timer2 return');
 
-            it('should stop executing immediate error occured', function(done) {
-                var errHandle = function(err) {
-                    err.message.should.equal('The file not_exist.js was not found.');
                     done();
-                    d.removeListener('error', errHandle);
-                    d.exit();
-                };
-
-                d.on('error', errHandle);
-
-                d.run(function() {
-                    Stepify()
-                        .task('foo')
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    c3++;
-                                    root.done(null);
-                                }, 300);
-                            })
-                            .step(function() {
-                                var root = this;
-                                fs.readFile(path.join(__dirname, 'not_exist.js'), function(err) {
-                                    c3++;
-                                    if(err) err = 'The file not_exist.js was not found.';
-                                    root.done(err);
-                                });
-                            })
-                            .error(function(err) {
-                                throw new Error('The file not_exist.js was not found.');
-                            })
-                        .pend()
-                        .task('bar')
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    c3++;
-                                    root.done(null);
-                                }, 300);
-                            })
-                            .step(function() {
-                                var root = this;
-                                setTimeout(function() {
-                                    c3++;
-                                    root.done('should not executed ever.');
-                                }, 100);
-                            })
-                        .run();
-                });
-            });
+                })
+                .run();
         });
     });

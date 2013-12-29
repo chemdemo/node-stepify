@@ -6,7 +6,7 @@ var fs = require('fs');
 
 // see: http://www.slideshare.net/domenicdenicola/domains-20010482
 
-describe('active domain not created case', function() {
+/*describe('active domain not created case', function() {
     it('should has no active domain if `domain.create()` not called', function() {
         should.not.exist(process.domain);
     });
@@ -30,4 +30,34 @@ describe('active domain not created case', function() {
 
         should.not.exist(process.domain);
     });
-});
+});*/
+
+// describe('#bind()', function() {
+    var d = domain.create();
+
+    d.on('error', function(err) {
+        console.log(d.domain, err.message);
+    });
+
+    var bind = d.bind(function() {
+        process.nextTick(function() {
+            fs.readFile('non_existent.js', function(err, str) {
+                if(err) throw err;
+                console.log(str.toString());
+            });
+        });
+    });
+
+    var intercept = d.intercept(function() {
+        process.nextTick(function() {
+            fs.readFile('non_existent.js', function(err, str) {
+                if(err) throw err;
+                console.log(str.toString());
+            });
+        });
+    });
+
+    bind();
+
+    // intercept();
+// });

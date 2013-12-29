@@ -226,7 +226,7 @@ describe('Step', function() {
             Stepify()
                 .step('a', function() {
                     exed.push(this._stepName);
-                    this.parallel(files, fs.readFile);
+                    this.parallel(files, fs.readFile, {encoding: 'utf8'});
                 })
                 .step('b', function(list) {
                     exed.push(this._stepName);
@@ -235,7 +235,7 @@ describe('Step', function() {
                     list[0].toString().should.equal(fs.readFileSync(index).toString());
                     list[1].toString().should.equal(fs.readFileSync(__filename).toString());
 
-                    this.parallel(files, fs.readFile, this.done);
+                    this.parallel(files, fs.readFile, {encoding: 'utf8'}, this.done);
                 })
                 .step('c', function(list) {
                     list.should.have.length(2);
