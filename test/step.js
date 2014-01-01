@@ -1,5 +1,6 @@
 var assert = require('assert');
 var should = require('should');
+var domain = require('domain');
 
 var Stepify = require('../index');
 
@@ -235,15 +236,14 @@ describe('Step', function() {
                     list[0].toString().should.equal(fs.readFileSync(index).toString());
                     list[1].toString().should.equal(fs.readFileSync(__filename).toString());
 
-                    this.parallel(files, fs.readFile, {encoding: 'utf8'}, this.done);
+                    this.parallel(files, fs.readFile, {encoding: 'utf8'}, this.next);
                 })
                 .step('c', function(list) {
                     list.should.have.length(2);
                     list[0].toString().should.equal(fs.readFileSync(index).toString());
                     list[1].toString().should.equal(fs.readFileSync(__filename).toString());
 
-                    this.parallel(files, fs.readFile, function(err, results) {
-                        if(err) this.end(err);
+                    this.parallel(files, fs.readFile, function(results) {
                         exed.push(this._stepName);
                         results.should.be.an.Array;
                         this.next(results);
@@ -297,8 +297,7 @@ describe('Step', function() {
                                 callback(null, 'timer2 return');
                             }, 500);
                         }
-                    ], function(err, results) {
-                        if(err) throw err;
+                    ], function(results) {
                         this.next(results);
                     });
                 })
@@ -312,11 +311,99 @@ describe('Step', function() {
                 })
                 .run();
         });
+
+        it('should access exceptions into errorHandle when using parallel(arr, iterator[, callback]) mode', function(done) {
+            // mocha can not caught errors when working with node v0.8.x
+            if(process.version.match(/v0.8/)) return;
+
+            var d = domain.create();
+            var c = 0;
+
+            d.on('error', function(err) {
+                c.should.equal(1);
+                err.message.should.equal('non_existent.js was not found');
+                done();
+            });
+
+            d.enter();
+
+            Stepify()
+                .step(function() {
+                    c++;
+                    var mock = files.splice(0);
+                    mock.splice(1, 0, 'non_existent.js');
+                    this.parallel(mock, fs.readFile, 'utf8');
+                })
+                .step(function() {
+                    // should not step into this step
+                    c++;
+                })
+                .error(function(err) {
+                    // rewrite err for testing...
+                    if(err) err = 'non_existent.js was not found';
+                    throw new Error(err);
+                })
+                .run();
+
+            d.exit();
+        });
+
+        it('should access exceptions into errorHandle when using parallel(arr[, callback]) mode', function(done) {
+            // mocha can not caught errors when working with node v0.8.x
+            if(process.version.match(/v0.8/)) return;
+
+            var d = domain.create();
+            var c = 0;
+
+            d.on('error', function(err) {
+                c.should.equal(1);
+                err.message.should.equal('non_existent.js was not found');
+                done();
+            });
+
+            d.enter();
+
+            Stepify()
+                .step(function() {
+                    this.parallel([
+                        function(callback) {
+                            setTimeout(function() {
+                                c++;
+                                // do some more stuff ...
+                                callback(null, 1);
+                            }, 10);
+                        },
+                        function(callback) {
+                            c++;
+                            fs.readFile('non_existent.js', callback);
+                        },
+                        function(callback) {
+                            setTimeout(function() {
+                                c++;
+                                callback(null, 1);
+                            }, 20);
+                        }
+                    ]);
+                })
+                .step(function() {
+                    // should not run into this step
+                    c++;
+                })
+                .error(function(err) {
+                    // rewrite err for testing...
+                    if(err) err = 'non_existent.js was not found';
+                    throw new Error(err);
+                })
+                .run();
+
+            d.exit();
+        });
     });
 
-    describe('#jump()', function() {
-        ;
-    });
+    // This method temporarily released.
+    // describe('#jump()', function() {
+    //     ;
+    // });
 
     describe('#next()', function() {
         it('should pass variables into next step handle', function(done) {
