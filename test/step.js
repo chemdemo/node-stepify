@@ -314,7 +314,7 @@ describe('Step', function() {
 
         it('should access exceptions into errorHandle when using parallel(arr, iterator[, callback]) mode', function(done) {
             // mocha can not caught errors when working with node v0.8.x
-            if(process.version.match(/v0.8/)) return;
+            if(process.version.match(/v0.8/)) return done();
 
             var d = domain.create();
             var c = 0;
@@ -350,7 +350,7 @@ describe('Step', function() {
 
         it('should access exceptions into errorHandle when using parallel(arr[, callback]) mode', function(done) {
             // mocha can not caught errors when working with node v0.8.x
-            if(process.version.match(/v0.8/)) return;
+            if(process.version.match(/v0.8/)) return done();
 
             var d = domain.create();
             var c = 0;
