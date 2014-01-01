@@ -112,7 +112,7 @@ describe('Stepify', function() {
         });
 
         it('should throw error if the accessed `stepName` was preset within the construtor', function() {
-            var inserts = ['debug', 'task', 'step', 'pend', 'error', 'timeout', 'finish', 'run'];
+            var inserts = ['debug', 'task', 'step', 'pend', 'error', 'result', 'run'];
             var name = inserts[Math.floor(Math.random()*inserts.length)];
             (function() {
                 Stepify()
