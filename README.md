@@ -20,11 +20,6 @@ stepify和目前流行的一些异步类库（如[async](https://github.com/caol
 
 - 统一处理单个异步操作的异常，也可根据需要单独处理某个任务的异常。
 
-### 最简单的例子
-
-``` javascript
-```
-
-### License
+## License
 
 MIT [http://rem.mit-license.org](http://rem.mit-license.org)
