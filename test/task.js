@@ -54,8 +54,7 @@ describe('Stepify', function() {
                 .run();
         });
 
-        it('shoule executed without error even if \
-            the task() method has not explicitly called', function(done) {
+        it('shoule executed without error even if the task() method has not explicitly called', function(done) {
             Stepify()
                 .step('setTimeout', function() {
                     this._task._taskName.should.equal('_UNAMED_TASK_0');
