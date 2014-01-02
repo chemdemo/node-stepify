@@ -400,10 +400,98 @@ describe('Step', function() {
         });
     });
 
-    // This method temporarily released.
-    // describe('#jump()', function() {
-    //     ;
-    // });
+    // Be careful using this method
+    describe('#jump()', function() {
+        it('should support jump(stepName) mode', function(done) {
+            var steps = [];
+            Stepify()
+                .step('a', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .step('b', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .step(function() {
+                    if(!this.vars('flag')) {
+                        this.jump('a');
+                        this.vars('flag', 1)
+                    } else {
+                        this.next();
+                    }
+                })
+                .step('c', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .result(function() {
+                    steps.should.eql(['a', 'b', 'a', 'b', 'c']);
+                    done();
+                })
+                .run();
+        });
+
+        it('should support jump(index) mode', function(done) {
+            var steps = [];
+            Stepify()
+                .step('a', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .step('b', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .step(function() {
+                    if(!this.vars('flag')) {
+                        this.jump(1);
+                        this.vars('flag', 1)
+                    } else {
+                        this.next();
+                    }
+                })
+                .step('c', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .result(function() {
+                    steps.should.eql(['a', 'b', 'b', 'c']);
+                    done();
+                })
+                .run();
+        });
+
+        it('should support jump(step) mode', function(done) {
+            var steps = [];
+            Stepify()
+                .step('a', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .step('b', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .step(function() {
+                    if(!this.vars('flag')) {
+                        this.jump(-2);
+                        this.vars('flag', 1)
+                    } else {
+                        this.next();
+                    }
+                })
+                .step('c', function() {
+                    steps.push(this._stepName);
+                    this.done();
+                })
+                .result(function() {
+                    steps.should.eql(['a', 'b', 'a', 'b', 'c']);
+                    done();
+                })
+                .run();
+        });
+    });
 
     describe('#next()', function() {
         it('should pass variables into next step handle', function(done) {
