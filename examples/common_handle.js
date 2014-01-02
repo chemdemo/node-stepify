@@ -13,7 +13,7 @@ Stepify()
         // 这里简单把所有空格去掉
         buf = buf.toString().replace(/\s+/g, '');
         fs.writeFile(writed, buf, function(err) {
-            // writed就是写入的文件名，它将作为第一个动态参数传入下一步的函数体，即read
+            // writed就是写入的文件名，它将作为第一个动态参数传入下一步的函数体，即下一步rread
             root.done(err, writed);
         });
     })

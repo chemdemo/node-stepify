@@ -17,7 +17,7 @@ Stepify()
     })
     .step('getInfo', function(token) {
         request.get('[info_uri]?token=' + token, function(err, res, body) {
-            // got user info, return to client via http response
+            // got user info, pass it to client via http response
         });
     })
     .run();
