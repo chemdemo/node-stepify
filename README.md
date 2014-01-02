@@ -114,7 +114,7 @@ someWork4.run(['foo', 'bar']);
 
 stepify内部实际上有两个主要的类，一个是Stepify，一个是Step。
 
-`Stepify()`的调用会返回一个Stepify实例，用于调度所有task的执行。
+`Stepify()`的调用会返回一个Stepify实例，在这里称之为workflow，用于调度所有task的执行。
 
 `step()`的调用会创建一个Step实例，用于完成具体的异步操作（当然也可以是同步操作，不过意义不大），step之间使用简单的api（done方法和next方法）传递。
 
@@ -356,13 +356,23 @@ Stepify()
     .step(fn)
     .step(fn)
     // 这个task的异常会走到这里
-    .error(handle)
+    .error(function(err) {
+        if(err.message.match(/can_ignore/)) {
+            // 继续执行下一步
+            this.next();
+        } else {
+            throw err;
+        }
+    })
     .pend()
     .step(fn)
     .step(fn)
     .pend()
     // 所有没显式定义errorHandle的所有task异常都会走到这里
-    .error(handle)
+    .error(function(err) {
+        console.error(err.stack);
+        res.send(500, 'Server error!');
+    })
     .run();
 ```
 
@@ -448,44 +458,173 @@ Object.keys(modes).forEach(function(mode) {
 
 例子：
 
+``` javascript
+Stepify()
+    .step(function() {
+        var root = this;
+        setTimeout(function() {
+            root.done();
+        }, 200);
+    })
+    .step(function() {
+        var root = this;
+        exec('curl "https://github.com/"', function(err, res) {
+            // end this task in error occured
+            if(err) root.end();
+            else root.done(null, res);
+        });
+    })
+    .step(function(res) {
+        var root = this;
+        setTimeout(function() {
+            // do some stuff with res ...
+            console.log(res);
+            root.done();
+        }, 100);
+    })
+    .run();
+```
+
 #### wrap()
 
-描述：
+描述：其实就是`this.done.bind(this)`的简写，包装done函数保证它的执行环境是当前step。比如原生的`fs.readFile()`的callback的执行环境是null[fs.js#L91](https://github.com/joyent/node/blob/master/lib/fs.js#L91)
 
-调用：
+调用：wrap()
 
-参数：
-
-- #
+参数：无
 
 例子：
+
+``` javascript
+Stepify()
+    .step(function() {
+        fs.readdir(__dirname, this.done.bind(this));
+    })
+    .step(function() {
+        fs.readFile(__filename, this.wrap());
+    })
+    .run();
+```
 
 #### fulfill()
 
-描述：
+描述：把step执行的结果推入结果队列，最终传入result函数的handle。最终结果数组的元素顺序在传入给resultHandle时不做任何修改。
 
-调用：
+调用：fulfill(*args)
 
 参数：
 
-- #
+- {Mix} 可选参数 可以是一个或者多个参数，会一一push到结果队列。
 
 例子：
+
+``` javascript
+// Assuming retrieving user info
+Stepify()
+    .step(function() {
+        var root = this;
+        db.getBasic(function(err, basic) {
+            root.fulfill(basic || null);
+            root.done(err, basic.id);
+        });
+    })
+    .step(function(id) {
+        var root = this;
+        db.getDetail(id, function(err, detail) {
+            root.fulfill(detail || null);
+            root.done(err);
+        });
+    })
+    .error(function(err) {
+        console.error(err);
+        res.send(500, 'Get user info error.');
+    })
+    .result(function(r) {
+        res.render('user', {basic: r[0], detail: r[1]});
+    })
+    .run();
+```
 
 #### vars()
 
-描述：
+描述：定义/获取一个临时变量。暂存临时变量，在整个workflow的运行期可用。当然啦，可以在workflow定义之前先声明，在step里边访问。
 
-调用：
+调用：vars(key[, value])
 
 参数：
 
-- #
+- {String} key 变量名。访问临时变量。
 
-例子：
+- {Mix} value 变量值。如果只传入key则是访问变量，如果传入两个值则是写入变量并返回这个value。
+
+例子：略。
 
 #### parallel()
 
+描述：简单的并发支持。在step内部，如果遇到parallel无法支持到的情况，可尝试配合其他库完成并行任务。
+
+调用：parallel(arr[, iterator, *args, callback])
+
+参数：
+
+- {Array} arr 必传参数。需要并行执行的一个数组，对于数组元素只有一个要求，就是如果有函数则所有元素都必须是一个函数。
+
+- {Function} iterator 如果arr参数是一个函数数组，这个参数是不用传的，否则是必传参数，它迭代运行arr的每一个元素。
+
+- {Mix} *args 传递给iterator的参数，在迭代器执行的时候，arr数组的每一个元素作为iterator的第一个参数，\*args则作为剩下的传入。
+
+- {Function} callback 可选参数（约定当最后一个参数是函数时认为它是回调函数） 默认是next。这个并行任务的执行结果会作为一个数组按arr中定义的顺序传入callback，如果执行遇到错误，则直接交给errHandle处理。
+
+例子：
+
+传入一个非函数数组（parallel(arr, iterator[, *arg, callback])）
+
+``` javascript
+Stepify()
+    .step(function() {
+        fs.readdir(path.resolve('./test'), this.wrap());
+    })
+    .step(function(list) {
+        list = list.filter(function(p) {return path.extname(p).match('js');});
+        list.forEach(function(file, i) {list[i] = path.resolve('./test', file);});
+        // 注释部分就相当于默认的this.next
+        this.parallel(list, fs.readFile, {encoding: 'utf8'}/*, function(bufArr) {this.next(bufArr);}*/);
+    })
+    .step(function(bufArr) {
+        // fs.writeFile('./combiled.js', Buffer.concat(bufArr), this.done.bind(this));
+        // or
+        this.parallel(bufArr, fs.writeFile.bind(this, './combiled.js'));
+    })
+    .run();
+```
+
+传入函数数组（parallel(fnArr[, callback])）
+
+``` javascript
+Stepify()
+    .step(function() {
+        this.parallel([
+            function(callback) {
+                fs.readFile(__filename, callback);
+            },
+            function(callback) {
+                setTimeout(function() {
+                    callback(null, 'some string...');
+                }, 500);
+            }
+        ]);
+    })
+    .step(function(list) {
+        console.log(list); // [fs.readFileSync(__filename), 'some string...']
+        // todo...
+    })
+    .run();
+```
+
+可以看到，非函数数组的时候参数比较简单。
+
+#### jump()
+
 描述：
 
 调用：
@@ -496,6 +635,17 @@ Object.keys(modes).forEach(function(mode) {
 
 例子：
 
+#### next()
+
+描述：
+
+调用：
+
+参数：
+
+- #
+
+例子：
 
 #### end()
 
