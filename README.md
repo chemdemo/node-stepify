@@ -1,4 +1,6 @@
-# stepify [![Build Status](https://api.travis-ci.org/chemdemo/node-stepify.png)](http://travis-ci.org/chemdemo/node-stepify)
+# stepify 
+[![Build Status](https://api.travis-ci.org/chemdemo/node-stepify.png)](http://travis-ci.org/chemdemo/node-stepify) 
+[![NPM version](https://badge.fury.io/js/stepify.png)](https://npmjs.org/package/stepify)
 
 stepify是一个简单易用的Node.js异步流程控制库，提供一种比较灵活的方式完成Node.js（多）任务。
 
