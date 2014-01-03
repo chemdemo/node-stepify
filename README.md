@@ -49,27 +49,28 @@ Stepify()
 Stepify()
     .step('read', __filename)
     .step(function(buf) {
-        // buf就是当前文档的内容
+        // buf is the buffer content of __filename
         var root = this;
         var writed = 'test.js';
 
-        // 对buffer做更多的操作
-        // 这里简单把所有空格去掉
+        // do more stuff with buf
+        // this demo just replace all spaces simply
         buf = buf.toString().replace(/\s+/g, '');
         fs.writeFile(writed, buf, function(err) {
-            // writed就是写入的文件名，它将作为第一个动态参数传入下一步的函数体，即下一步read
+            // writed is the name of target file,
+            // it will be passed into next step as the first argument
             root.done(err, writed);
         });
     })
     .step('read')
-    // 这里read是一个公共的方法，读取文件内容，可传入不同的path参数
+    // `read` here is a common handle stored in workflow
     .read(function(p, encoding) {
         fs.readFile(p, encoding || null, this.done.bind(this));
     })
     .run();
 ```
 
-这里多了一个`read()`方法，但read方法并不是stepify内置的方法。实际上，您可以任意“扩展”stepify链！它的奥妙在于`step()`方法的参数，详细请看step调用说明。
+这里多了一个`read()`方法，但read方法并不是stepify内置的方法。实际上，您可以任意“扩展”stepify链！它的奥妙在于`step()`方法的参数，详细请看[step调用说明](#step)。
 
 可以看到，一个复杂的异步操作，通过stepify定制，每一步都是那么清晰可读！
 
@@ -86,23 +87,29 @@ $ npm install
 $ mocha
 ```
 
-## 使用
+## 灵活使用
 
-``` javascriopt
+``` javascript
 var Stepify = require('stepify');
-var someWork1 = Stepify().step().step()...run();
+var workflow1 = Stepify().step(fn).step(fn)...run();
 // or
-var someWork2 = new Stepify().step().step()...run();
+var workflow2 = new Stepify().step(fn).step(fn)...run();
 // or
-var someWork3 = Stepify().step().step();
+var workflow3 = Stepify().step(fn).step(fn);
 // do some stuff ...
-someWork3.run();
+workflow3.run();
 // or
-var someWork4 = Stepify().task('foo').step().step().task('bar').step().step();
+var workflow4 = Stepify().task('foo').step(fn).step(fn).task('bar').step(fn).step(fn);
 // do some stuff ...
-someWork4.run(['foo', 'bar']);
+workflow4.run(['foo', 'bar']);
+var workflow5 = Stepify().step(fn).step(fn);
+workflow5.debug = true;
+workflow5.result = function(result) {};
+workflow5.run();
 // more ...
 ```
+
+注：文档几乎所有的例子都是采用链式调用，但是拆开执行也是没有问题的。
 
 ## 原理
 
@@ -116,43 +123,49 @@ stepify内部实际上有两个主要的类，一个是Stepify，一个是Step�
 
 `Stepify()`的调用会返回一个Stepify实例，在这里称之为workflow，用于调度所有task的执行。
 
-`step()`的调用会创建一个Step实例，用于完成具体的异步操作（当然也可以是同步操作，不过意义不大），step之间使用简单的api（done方法和next方法）传递。
+`step()`的调用会创建一个Step实例，用于完成具体的异步操作（当然也可以是同步操作，不过意义不大），step之间使用简单的api（[done](#done)方法和[next](#next)方法）传递。
 
 ## API 文档
 
-### Stepify类（创建一个workflow）：
+### Stepify类：
 
-- [debug]()
+调用Stepify即可创建一个workflow。
 
-- [task]()
+- [debug](#debug)
 
-- [step]()
+- [task](#task)
 
-- [pend]()
+- [step](#step)
 
-- *[stepName]()*
+- [pend](#pend)
 
-- [error]()
+- *[stepName](#stepname)*
 
-- [result]()
+- [error](#error)
 
-- [run]()
+- [result](#result)
 
-### Step类（只在Stepify实例调用step方法时创建，不必显式调用）：
+- [run](#run)
 
-- [done]()
+### Step类：
 
-- [wrap]()
+Step类只在Stepify实例调用step方法时创建，不必显式调用。
 
-- [fulfill]()
+- [done](#done)
 
-- [vars]()
+- [wrap](#wrap)
 
-- [parallel]()
+- [fulfill](#fulfill)
 
-- [next]()
+- [vars](#vars)
 
-- [end]()
+- [parallel](#parallel)
+
+- [jump](#jump)
+
+- [next](#next)
+
+- [end](#end)
 
 ---
 
@@ -177,7 +190,7 @@ work.debug = true;
 
 #### task()
 
-描述：显式创建一个task，task()的调用是可选的。在新定制一个task时，如果没有显式调用task()，则这个task的第一个step()内部会先生成一个task，后续的step都是挂在这个task上面，每一个task内部会维持自己的step队列。多个task使用`pend()`方法分割。
+描述：显式创建一个task，task()的调用是可选的。在新定制一个task时，如果没有显式调用task()，则这个task的第一个step()内部会先生成一个task，后续的step都是挂在这个task上面，每一个task内部会维持自己的step队列。多个task使用[pend](#pend)方法分割。
 
 调用：task([taskName])
 
@@ -199,7 +212,7 @@ var myWork2 = Stepify()
     .task('bar')
     	.step(fn)
         .step(fn)
-    .task('biz')
+    .task('baz')
     	.step(fn)
         .step(fn)
     .run();
@@ -213,11 +226,11 @@ var myWork2 = Stepify()
 
 参数：
 
-- {String} stepName 可选参数，但在不传stepHandle时是必传参数。为这个step分配一个名称。当stepHandle没有传入时，会在Stepify原型上扩展一个以stepName命名的方法，而它具体的实现则在调用stepName方法时决定，这个方法详情请看*[stepName说明]()*。
+- {String} stepName 可选参数，但在不传stepHandle时是必传参数。为这个step分配一个名称。当stepHandle没有传入时，会在Stepify原型上扩展一个以stepName命名的方法，而它具体的实现则在调用stepName方法时决定，这个方法详情请看[*stepName说明*](#stepname)。
 
 - {Function} stepHandle 可选参数，但在stepName不传时是必传参数。在里边具体定义一个异步操作的过程。stepHandle的执行分两步，先查找这个step所属的task上有没有stepHandle，找不到则查找Stepify实例上有没有stepHandle，再没有就抛异常。
 
-- {Mix} *args 可选参数，表示这个step的已知参数（即静态参数），在stepHandle执行的时候会把静态参与动态参数（通过[done]()或者[next]()传入）合并作为stepHandle的最终参数。
+- {Mix} *args 可选参数，表示这个step的已知参数（即静态参数），在stepHandle执行的时候会把静态参与动态参数（通过[done](#done)或者[next](#next)传入）合并作为stepHandle的最终参数。
 
 例子：
 
@@ -270,7 +283,7 @@ Stepify()
 
 参数： 无参数。
 
-例子：见*[stepName]()*部分
+例子：见*[stepName](#stepname)*部分
 
 #### *stepName()*
 
@@ -378,7 +391,7 @@ Stepify()
 
 #### result()
 
-描述：所有task执行完之后，输出结果。在Stepify内部，会保存一份结果数组，通过step的[fulfill方法]()可以将结果push到这个数组里，result执行的时候将这个数组传入finishHandle。
+描述：所有task执行完之后，输出结果。在Stepify内部，会保存一份结果数组，通过step的[fulfill方法](#fulfill)可以将结果push到这个数组里，result执行的时候将这个数组传入finishHandle。
 
 调用：result(finishHandle)
 
@@ -487,7 +500,7 @@ Stepify()
 
 #### wrap()
 
-描述：其实就是`this.done.bind(this)`的简写，包装done函数保证它的执行环境是当前step。比如原生的`fs.readFile()`的callback的执行环境是null[fs.js#L91](https://github.com/joyent/node/blob/master/lib/fs.js#L91)
+描述：其实就是`this.done.bind(this)`的简写，包装done函数保证它的执行环境是当前step。比如原生的`fs.readFile()`的callback的执行环境被设置为null[fs.js#L91](https://github.com/joyent/node/blob/master/lib/fs.js#L91)。
 
 调用：wrap()
 
@@ -508,7 +521,7 @@ Stepify()
 
 #### fulfill()
 
-描述：把step执行的结果推入结果队列，最终传入result函数的handle。最终结果数组的元素顺序在传入给resultHandle时不做任何修改。
+描述：把step执行的结果推入结果队列，最终传入finishHandle。最终结果数组的元素顺序在传入给finishHandle时不做任何修改。
 
 调用：fulfill(*args)
 
@@ -547,7 +560,7 @@ Stepify()
 
 #### vars()
 
-描述：定义/获取一个临时变量。暂存临时变量，在整个workflow的运行期可用。当然啦，可以在workflow定义之前先声明，在step里边访问。
+描述：暂存临时变量，在整个workflow的运行期可用。如果不想在workflow之外使用`var`申明别的变量，可以考虑用vars()。
 
 调用：vars(key[, value])
 
@@ -557,11 +570,25 @@ Stepify()
 
 - {Mix} value 变量值。如果只传入key则是访问变量，如果传入两个值则是写入变量并返回这个value。
 
-例子：略。
+例子：
+
+``` javascript
+Stepify()
+    .step(function() {
+        this.vars('foo', 'bar');
+        // todo
+    })
+    .pend()
+    .step(function() {
+        // todo
+        console.log(this.vars('foo')); // bar
+    })
+    .run();
+```
 
 #### parallel()
 
-描述：简单的并发支持。在step内部，如果遇到parallel无法支持到的情况，可尝试配合其他库完成并行任务。
+描述：简单的并发支持。*在step内部，如遇到parallel无法支持到的情况，可尝试配合其他库完成并行任务。*
 
 调用：parallel(arr[, iterator, *args, callback])
 
@@ -571,7 +598,7 @@ Stepify()
 
 - {Function} iterator 如果arr参数是一个函数数组，这个参数是不用传的，否则是必传参数，它迭代运行arr的每一个元素。
 
-- {Mix} *args 传递给iterator的参数，在迭代器执行的时候，arr数组的每一个元素作为iterator的第一个参数，\*args则作为剩下的传入。
+- {Mix} \*args 传递给iterator的参数，在迭代器执行的时候，arr数组的每一个元素作为iterator的第一个参数，\*args则作为剩下的传入。
 
 - {Function} callback 可选参数（约定当最后一个参数是函数时认为它是回调函数） 默认是next。这个并行任务的执行结果会作为一个数组按arr中定义的顺序传入callback，如果执行遇到错误，则直接交给errHandle处理。
 
@@ -625,39 +652,91 @@ Stepify()
 
 #### jump()
 
-描述：
+描述：在step之间跳转。**这样会打乱step的执行顺序，谨慎使用jump，以免导致死循环**。
 
-调用：
+调用：jump(index|stepName)
 
 参数：
 
-- #
+- {Number} index 要跳转的step索引。在step创建的时候会自建一个索引属性，使用`this._index`可以访问它。
+
+- {String} stepName step创建时传入的名称。
 
 例子：
+
+``` javascript
+Stepify()
+    .step('a', fn)
+    .step('b', fn)
+    .step(function() {
+        if(!this.vars('flag')) {
+            this.jump('a');
+            this.vars('flag', 1)
+        } else {
+            this.next();
+        }
+
+        // 其他的异步操作
+    })
+    .step('c', fn)
+    .run();
+```
 
 #### next()
 
-描述：
+描述：显式调用下一个step，并将数据传给下一步（下一个step的动态数据）。其实等同于done(null, *args)。
 
-调用：
+调用：next([*args])
 
 参数：
 
-- #
+- {Mix} *args 可选参数 类型不限，数量不限。
 
 例子：
+
+``` javascript
+Stepify()
+    .step(function() {
+        // do some stuff ...
+        this.next('foo', 'bar');
+    })
+    .step(function(a, b, c) {
+        a.should.equal('test');
+        b.should.equal('foo');
+        c.should.equal('bar');
+    }, 'test')
+    .run();
+```
 
 #### end()
 
-描述：
+描述：终止当前task的执行。如果遇到异常并传递给end，则直接交给errorHandle，和done一样。不传或者传null则跳出所在task执行下一个task，没有则走到result，没有定义result则退出进程。
 
-调用：
+调用：end(err)
 
 参数：
 
-- #
+- {Error|null} err 可选参数， 默认null。
 
 例子：
+
+``` javascript
+Stepify()
+    .step(fn)
+    .step(function() {
+        if(Math.random() > 0.5) {
+            this.end();
+        } else {
+            // todo ...
+        }
+    })
+    .step(fn)
+    .run();
+```
+
+---
+
+最后，欢迎fork或者[提交bug](https://github.com/chemdemo/node-stepify/issues)^_^。
 
 ## License
 

@@ -1,0 +1,6 @@
+examples/
+test/test.js
+lib/Step_bak.js
+lib/Stepify_bak.js
+Makefile
+.travis.yml

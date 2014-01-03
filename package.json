@@ -1,7 +1,7 @@
 {
     "name": "stepify",
     "description": "Executing nodejs asynchronous tasks by steps chain",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "engine": {
         "node": ">= 0.8.0"
     },
@@ -9,7 +9,6 @@
         "test": "mocha -R spec"
     },
     "main": "./index",
-    "author": "dmyang <yangdemo@gmail.com>",
     "repository": {
         "type": "git",
         "url": "https://github.com/chemdemo/node-stepify.git"
@@ -23,5 +22,14 @@
     },
     "keywords": [
         "node-stepify", "flow-control", "stepify", "step", "async", "asynchronous", "chain"
-    ]
+    ],
+    "author": "dmyang <yangdemo@gmail.com>",
+    "maintainers": [
+        {
+            "name": "dmyang",
+            "email": "yangdemo@gmail.com",
+            "web": "http://www.dmfeel.com"
+        }
+    ],
+    "license": "MIT"
 }
