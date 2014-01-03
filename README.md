@@ -598,7 +598,7 @@ Stepify()
     .run();
 ```
 
-传入函数数组（parallel(fnArr[, callback])）
+传入函数数组（parallel(fnArr[])）
 
 ``` javascript
 Stepify()
