@@ -69,7 +69,7 @@ Stepify()
     .run();
 ```
 
-这里多了一个`read()`方法，但read方法并不是stepify内置的方法。实际上，您可以任意“扩展”stepify链！它的奥妙在于`step()`方法的参数，详细请看step调用说明。
+这里多了一个`read()`方法，但read方法并不是stepify内置的方法。实际上，您可以任意“扩展”stepify链！它的奥妙在于`step()`方法的参数，详细请看[step调用说明](#step)。
 
 可以看到，一个复杂的异步操作，通过stepify定制，每一步都是那么清晰可读！
 
@@ -116,7 +116,7 @@ stepify内部实际上有两个主要的类，一个是Stepify，一个是Step�
 
 `Stepify()`的调用会返回一个Stepify实例，在这里称之为workflow，用于调度所有task的执行。
 
-`step()`的调用会创建一个Step实例，用于完成具体的异步操作（当然也可以是同步操作，不过意义不大），step之间使用简单的api（done方法和next方法）传递。
+`step()`的调用会创建一个Step实例，用于完成具体的异步操作（当然也可以是同步操作，不过意义不大），step之间使用简单的api（[done](#done)方法和[next](#next)方法）传递。
 
 ## API 文档
 
@@ -177,7 +177,7 @@ work.debug = true;
 
 #### task()
 
-描述：显式创建一个task，task()的调用是可选的。在新定制一个task时，如果没有显式调用task()，则这个task的第一个step()内部会先生成一个task，后续的step都是挂在这个task上面，每一个task内部会维持自己的step队列。多个task使用`pend()`方法分割。
+描述：显式创建一个task，task()的调用是可选的。在新定制一个task时，如果没有显式调用task()，则这个task的第一个step()内部会先生成一个task，后续的step都是挂在这个task上面，每一个task内部会维持自己的step队列。多个task使用[pend](#pend)方法分割。
 
 调用：task([taskName])
 
@@ -213,11 +213,11 @@ var myWork2 = Stepify()
 
 参数：
 
-- {String} stepName 可选参数，但在不传stepHandle时是必传参数。为这个step分配一个名称。当stepHandle没有传入时，会在Stepify原型上扩展一个以stepName命名的方法，而它具体的实现则在调用stepName方法时决定，这个方法详情请看*[stepName说明]()*。
+- {String} stepName 可选参数，但在不传stepHandle时是必传参数。为这个step分配一个名称。当stepHandle没有传入时，会在Stepify原型上扩展一个以stepName命名的方法，而它具体的实现则在调用stepName方法时决定，这个方法详情请看[*stepName说明*](#stepName)。
 
 - {Function} stepHandle 可选参数，但在stepName不传时是必传参数。在里边具体定义一个异步操作的过程。stepHandle的执行分两步，先查找这个step所属的task上有没有stepHandle，找不到则查找Stepify实例上有没有stepHandle，再没有就抛异常。
 
-- {Mix} *args 可选参数，表示这个step的已知参数（即静态参数），在stepHandle执行的时候会把静态参与动态参数（通过[done]()或者[next]()传入）合并作为stepHandle的最终参数。
+- {Mix} *args 可选参数，表示这个step的已知参数（即静态参数），在stepHandle执行的时候会把静态参与动态参数（通过[done](#done)或者[next](#next)传入）合并作为stepHandle的最终参数。
 
 例子：
 
@@ -378,7 +378,7 @@ Stepify()
 
 #### result()
 
-描述：所有task执行完之后，输出结果。在Stepify内部，会保存一份结果数组，通过step的[fulfill方法]()可以将结果push到这个数组里，result执行的时候将这个数组传入finishHandle。
+描述：所有task执行完之后，输出结果。在Stepify内部，会保存一份结果数组，通过step的[fulfill方法](#fulfill)可以将结果push到这个数组里，result执行的时候将这个数组传入finishHandle。
 
 调用：result(finishHandle)
 
@@ -487,7 +487,7 @@ Stepify()
 
 #### wrap()
 
-描述：其实就是`this.done.bind(this)`的简写，包装done函数保证它的执行环境是当前step。比如原生的`fs.readFile()`的callback的执行环境是null[fs.js#L91](https://github.com/joyent/node/blob/master/lib/fs.js#L91)
+描述：其实就是`this.done.bind(this)`的简写，包装done函数保证它的执行环境是当前step。比如原生的`fs.readFile()`的callback的执行环境被设置为null[fs.js#L91](https://github.com/joyent/node/blob/master/lib/fs.js#L91)。
 
 调用：wrap()
 
@@ -508,7 +508,7 @@ Stepify()
 
 #### fulfill()
 
-描述：把step执行的结果推入结果队列，最终传入result函数的handle。最终结果数组的元素顺序在传入给resultHandle时不做任何修改。
+描述：把step执行的结果推入结果队列，最终传入finishHandle。最终结果数组的元素顺序在传入给finishHandle时不做任何修改。
 
 调用：fulfill(*args)
 
