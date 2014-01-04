@@ -104,7 +104,9 @@ var workflow4 = Stepify().task('foo').step(fn).step(fn).task('bar').step(fn).ste
 workflow4.run(['foo', 'bar']);
 var workflow5 = Stepify().step(fn).step(fn);
 workflow5.debug = true;
+workflow5.error = function(err) {};
 workflow5.result = function(result) {};
+...
 workflow5.run();
 // more ...
 ```
@@ -360,7 +362,7 @@ Stepify()
 
 - {Function} errorHandle 必传参数 **默认会直接抛出异常并中断当前task的执行**。每一个task都可以定制自己的errorHandle，亦可为所有task定制errorHandle。每个step执行如果出错会直接进入这个errorHandle，后面是否继续执行取决于errorHandle内部定义。errorHandle第一个参数便是具体异常信息。
 
-注意：errorHandle的执行环境是所在的那个step，也就是说Step类定义的所有方法在errorHandle内部均可用，您可以在异常时决定是否继续执行下一步。
+注意：errorHandle的执行环境是发生异常所在的那个step，也就是说Step类定义的所有方法在errorHandle内部均可用，您可以在异常时决定是否继续执行下一步，或者使用`this._taskName`和`this._stepName`分别访问所属task的名称和step的名称，进而得到更详细的异常信息。
 
 例子：
 
@@ -370,6 +372,7 @@ Stepify()
     .step(fn)
     // 这个task的异常会走到这里
     .error(function(err) {
+        console.error('Error occurs when running task %s\'s %s step!', this._taskName, this._stepName);
         if(err.message.match(/can_ignore/)) {
             // 继续执行下一步
             this.next();
