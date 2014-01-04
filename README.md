@@ -1,6 +1,12 @@
-# stepify [![Build Status](https://api.travis-ci.org/chemdemo/node-stepify.png)](http://travis-ci.org/chemdemo/node-stepify)
+# stepify 
+[![Build Status](https://api.travis-ci.org/chemdemo/node-stepify.png)](http://travis-ci.org/chemdemo/node-stepify) 
+[![NPM version](https://badge.fury.io/js/stepify.png)](https://npmjs.org/package/stepify)
 
-stepify是一个简单易用的Node.js异步流程控制库，提供一种比较灵活的方式完成Node.js（多）任务。目标是将复杂的任务进行拆分成多步完成，使得每一步的执行过程更加透明，化繁为简。stepify侧重流程控制，甚至可以和其他异步类库配合使用。
+stepify是一个简单易用的Node.js异步流程控制库，提供一种比较灵活的方式完成Node.js（多）任务。
+
+目标是将复杂的任务进行拆分成多步完成，使得每一步的执行过程更加透明，化繁为简。
+
+stepify侧重流程控制，甚至可以和其他异步类库配合使用。
 
 ## stepify特点
 
@@ -628,7 +634,7 @@ Stepify()
     .run();
 ```
 
-传入函数数组（parallel(fnArr[, callback])）
+传入函数数组（parallel(fnArr[])）
 
 ``` javascript
 Stepify()
