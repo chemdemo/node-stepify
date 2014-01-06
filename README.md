@@ -678,7 +678,7 @@ Stepify()
                     db.fetchByFileName(imgPath).pipe(fs.createWriteStream(targetUrl));
                     cb(null);
                 });
-            }, callback);
+            }, function(r) {callback(null, r);});
         },
         function(callback) {
             root.parallel(remoteQ, function(frameData, cb) {
@@ -688,14 +688,12 @@ Stepify()
                     // ...
                     cb(null);
                 }).pipe(fs.createWriteStream(targetUrl));
-            }, callback);
+            }, function(r) {callback(null, r);});
         },
     ]);
 })
 ...
 ```
-
-可以看到，函数数组的时候参数比较简单。
 
 #### jump()
 
