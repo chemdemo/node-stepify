@@ -1,5 +1,5 @@
-# stepify 
-[![Build Status](https://api.travis-ci.org/chemdemo/node-stepify.png)](http://travis-ci.org/chemdemo/node-stepify) 
+# stepify
+[![Build Status](https://api.travis-ci.org/chemdemo/node-stepify.png)](http://travis-ci.org/chemdemo/node-stepify)
 [![NPM version](https://badge.fury.io/js/stepify.png)](https://npmjs.org/package/stepify)
 
 stepify是一个简单易用的Node.js异步流程控制库，提供一种比较灵活的方式完成Node.js（多）任务。
@@ -295,7 +295,7 @@ Stepify()
 
 #### *stepName()*
 
-描述：这是一个虚拟方法，它是通过动态扩展Stepify类原型链实现的，具体调用的名称由step方法的`stepName`参数决定。扩展原型链的stepName的必要条件是step方法传了stepName但是stepHandle没有传，且stepName在原型链上没定义过。当调用实例上的stepName方法时，会检测此时有没有在定义的task（使用pend方法结束一个task的定义），如果有则把传入的handle挂到到这个task的handles池里，没有则挂到Stepify的handles池。
+描述：这是一个虚拟方法，它是通过动态扩展Stepify类原型链实现的，具体调用的名称由step方法的`stepName`参数决定。扩展原型链的stepName的必要条件是step方法传了stepName（stepName需要是一个可以通过`.`访问属性的js变量）但是stepHandle没有传，且stepName在原型链上没定义过。当调用实例上的stepName方法时，会检测此时有没有在定义的task（使用pend方法结束一个task的定义），如果有则把传入的handle挂到到这个task的handles池里，没有则挂到Stepify的handles池。
 
 调用：stepName(stepHandle)
 
@@ -605,7 +605,7 @@ Stepify()
 
 - {Array} arr 必传参数。需要并行执行的一个数组，对于数组元素只有一个要求，就是如果有函数则所有元素都必须是一个函数。
 
-- {Function} iterator 如果arr参数是一个函数数组，这个参数是不用传的，否则是必传参数，它迭代运行arr的每一个元素。
+- {Function} iterator 如果arr参数是一个函数数组，这个参数是不用传的，否则是必传参数，它迭代运行arr的每一个元素。iterator的第一个参数是arr中的某一个元素，第二个参数是回调函数（`callback`），当异步执行完之后需要调用`callback(err, data)`。
 
 - {Mix} \*args 传递给iterator的参数，在迭代器执行的时候，arr数组的每一个元素作为iterator的第一个参数，\*args则作为剩下的传入。
 
@@ -657,7 +657,45 @@ Stepify()
     .run();
 ```
 
-可以看到，非函数数组的时候参数比较简单。
+下面是一个应用到某项目里的例子：
+
+``` javascript
+...
+.step('fetch-images', function() {
+    var root = this;
+    var localQ = [];
+    var remoteQ = [];
+
+    // do dome stuff to get localQ and remoteQ
+
+    this.parallel([
+        function(callback) {
+            root.parallel(localQ, function(frameData, cb) {
+                // ...
+                db.getContentType(frameData.fileName, function(type) {
+                    var imgPath = frameData.fileName + '.' + type;
+                    // ...
+                    db.fetchByFileName(imgPath).pipe(fs.createWriteStream(targetUrl));
+                    cb(null);
+                });
+            }, callback);
+        },
+        function(callback) {
+            root.parallel(remoteQ, function(frameData, cb) {
+                var prop = frames[frameData['frame']].children[frameData['elem']]['property'];
+                // ...
+                request({url: prop.src}, function(err, res, body) {
+                    // ...
+                    cb(null);
+                }).pipe(fs.createWriteStream(targetUrl));
+            }, callback);
+        },
+    ]);
+})
+...
+```
+
+可以看到，函数数组的时候参数比较简单。
 
 #### jump()
 
@@ -693,7 +731,7 @@ Stepify()
 
 #### next()
 
-描述：显式调用下一个step，并将数据传给下一步（下一个step的动态数据）。其实等同于done(null, *args)。
+描述：显式调用下一个step，并将数据传给下一step（即下一个step的动态参数）。其实等同于done(null, *args)。
 
 调用：next([*args])
 
