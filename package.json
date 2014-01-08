@@ -1,7 +1,7 @@
 {
     "name": "stepify",
     "description": "Executing nodejs asynchronous tasks by steps chain",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "engine": {
         "node": ">= 0.8.0"
     },
