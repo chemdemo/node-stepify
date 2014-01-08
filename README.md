@@ -249,7 +249,7 @@ Stepify()
 	.step(function() {
     	var root = this;
         setTimeout(function() {
-        	// 这里n+100即成为下一个stepHandle的动态参数
+        	// 这里done的第二个参数（100）即成为下一个stepHandle的动态参数
         	root.done(null, 100);
         }, 100);
     })
