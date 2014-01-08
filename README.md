@@ -295,7 +295,7 @@ Stepify()
 
 #### *stepName()*
 
-描述：这是一个虚拟方法，它是通过动态扩展Stepify类原型链实现的，具体调用的名称由step方法的`stepName`参数决定。扩展原型链的stepName的必要条件是step方法传了stepName（stepName需要是一个可以通过`.`访问属性的js变量）但是stepHandle没有传，且stepName在原型链上没定义过。当调用实例上的stepName方法时，会检测此时有没有在定义的task（使用pend方法结束一个task的定义），如果有则把传入的handle挂到到这个task的handles池里，没有则挂到Stepify的handles池。
+描述：这是一个虚拟方法，它是通过动态扩展Stepify类原型链实现的，具体调用的名称由step方法的`stepName`参数决定。扩展原型链的stepName的必要条件是step方法传了stepName（stepName需要是一个可以通过`.`访问属性的js变量）但是stepHandle没有传，且stepName在原型链上没定义过，当workflow执行结束之后会删除已经扩展到原型链上的所有方法。当调用实例上的stepName方法时，会检测此时有没有在定义的task（使用pend方法结束一个task的定义），如果有则把传入的handle挂到到这个task的handles池里，没有则挂到Stepify的handles池。
 
 调用：stepName(stepHandle)
 
