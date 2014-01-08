@@ -435,7 +435,7 @@ Stepify()
 
 #### run()
 
-描述：开始执行所定制的整个workflow。这里比较灵活，执行顺序可自行定制，甚至可以定义一个workflow，分多钟模式执行。
+描述：开始执行所定制的整个workflow。这里比较灵活，执行顺序可自行定制，甚至可以定义一个workflow，分多种模式执行。
 
 调用：run(*args)
 
@@ -781,7 +781,7 @@ Stepify()
 
 ---
 
-最后，欢迎fork或者[提交bug](https://github.com/chemdemo/node-stepify/issues)^_^。
+最后，欢迎fork或者[提交bug](https://github.com/chemdemo/node-stepify/issues)。
 
 ## License
 
