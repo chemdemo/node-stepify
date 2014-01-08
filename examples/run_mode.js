@@ -60,7 +60,7 @@ function createTask() {
             }, __filename)
         .pend()
         .sleep(function() {
-            console.log('Task %s sleep.', this._task._taskName);
+            console.log('Task %s sleep.', this.taskName);
             var root = this;
             setTimeout(function() {
                 root.done(null);

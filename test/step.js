@@ -226,11 +226,11 @@ describe('Step', function() {
         it('should support parallel(arr, iterator[, callback]) mode', function(done) {
             Stepify()
                 .step('a', function() {
-                    exed.push(this._stepName);
+                    exed.push(this.name);
                     this.parallel(files, fs.readFile, {encoding: 'utf8'});
                 })
                 .step('b', function(list) {
-                    exed.push(this._stepName);
+                    exed.push(this.name);
 
                     list.should.have.length(2);
                     list[0].toString().should.equal(fs.readFileSync(index).toString());
@@ -244,7 +244,7 @@ describe('Step', function() {
                     list[1].toString().should.equal(fs.readFileSync(__filename).toString());
 
                     this.parallel(files, fs.readFile, function(results) {
-                        exed.push(this._stepName);
+                        exed.push(this.name);
                         results.should.be.an.Array;
                         this.next(results);
                     });
@@ -257,7 +257,7 @@ describe('Step', function() {
                     var root = this;
 
                     setTimeout(function() {
-                        exed.push(root._stepName);
+                        exed.push(root.name);
                         root.done();
                     }, 300);
                 })
@@ -406,11 +406,11 @@ describe('Step', function() {
             var steps = [];
             Stepify()
                 .step('a', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .step('b', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .step(function() {
@@ -422,7 +422,7 @@ describe('Step', function() {
                     }
                 })
                 .step('c', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .result(function() {
@@ -436,11 +436,11 @@ describe('Step', function() {
             var steps = [];
             Stepify()
                 .step('a', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .step('b', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .step(function() {
@@ -452,7 +452,7 @@ describe('Step', function() {
                     }
                 })
                 .step('c', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .result(function() {
@@ -466,11 +466,11 @@ describe('Step', function() {
             var steps = [];
             Stepify()
                 .step('a', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .step('b', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .step(function() {
@@ -482,7 +482,7 @@ describe('Step', function() {
                     }
                 })
                 .step('c', function() {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     this.done();
                 })
                 .result(function() {
@@ -500,19 +500,19 @@ describe('Step', function() {
                 .step('a', function() {
                     var root = this;
                     setTimeout(function() {
-                        steps.push(root._stepName);
+                        steps.push(root.name);
                         root.next();
                     }, 500);
                 })
                 .step('b', function() {
                     var root = this;
                     setTimeout(function() {
-                        steps.push(root._stepName);
+                        steps.push(root.name);
                         root.next('params will be passed to the next step');
                     }, 500);
                 })
                 .step('c', function(param) {
-                    steps.push(this._stepName);
+                    steps.push(this.name);
                     param.should.equal('params will be passed to the next step');
                     this.done();
                 })
@@ -533,7 +533,7 @@ describe('Step', function() {
                     var root = this;
                     setTimeout(function() {
                         c++;
-                        execd.push(root._stepName);
+                        execd.push(root.name);
                         root.done();
                     }, 300);
                 })
@@ -541,7 +541,7 @@ describe('Step', function() {
                     var root = this;
                     setTimeout(function() {
                         c++;
-                        execd.push(root._stepName);
+                        execd.push(root.name);
                         // return root.end(null);
                         root.done(null, function() {
                             root.end();
@@ -552,7 +552,7 @@ describe('Step', function() {
                     var root = this;
                     setTimeout(function() {
                         c++;
-                        execd.push(root._stepName);
+                        execd.push(root.name);
                         root.done(null);
                     }, 300);
                 })
@@ -561,7 +561,7 @@ describe('Step', function() {
                     var root = this;
                     setTimeout(function() {
                         c++;
-                        execd.push(root._stepName);
+                        execd.push(root.name);
                         root.done(null);
                     }, 300);
                 })

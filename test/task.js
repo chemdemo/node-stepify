@@ -57,7 +57,7 @@ describe('Stepify', function() {
         it('shoule executed without error even if the task() method has not explicitly called', function(done) {
             Stepify()
                 .step('setTimeout', function() {
-                    this._task._taskName.should.equal('_UNAMED_TASK_0');
+                    this.taskName.should.equal('_UNAMED_TASK_0');
                     var root = this;
                     setTimeout(function() {
                         root.done(null, 'foo ok');
@@ -124,21 +124,21 @@ describe('Stepify', function() {
         it('should execute without error even if `stepName` param has not accessed into step() method', function(done) {
             Stepify()
                 .step(function() {
-                    this._stepName.should.equal('_UNAMED_STEP_0');
+                    this.name.should.equal('_UNAMED_STEP_0');
                     var root = this;
                     setTimeout(function() {
                         root.done(null);
                     }, 100);
                 })
                 .step('foo', function() {
-                    this._stepName.should.equal('foo');
+                    this.name.should.equal('foo');
                     var root = this;
                     setTimeout(function() {
                         root.done(null);
                     }, 200);
                 })
                 .step(function() {
-                    this._stepName.should.equal('_UNAMED_STEP_2');
+                    this.name.should.equal('_UNAMED_STEP_2');
                     var root = this;
                     setTimeout(function() {
                         root.done(null);
@@ -328,7 +328,7 @@ describe('Stepify', function() {
             var taskNames = [];
             Stepify()
                 .step(function() {
-                    var name = this._task._taskName;
+                    var name = this.taskName;
                     var root = this;
                     setTimeout(function() {
                         if(taskNames.indexOf(name) === -1) {
@@ -338,7 +338,7 @@ describe('Stepify', function() {
                     }, 200);
                 })
                 .step(function() {
-                    var name = this._task._taskName;
+                    var name = this.taskName;
                     var root = this;
                     fs.readFile(__filename, function(err) {
                         if(err) throw err;
@@ -350,7 +350,7 @@ describe('Stepify', function() {
                 })
                 .pend()
                 .step(function() {
-                    var name = this._task._taskName;
+                    var name = this.taskName;
                     var root = this;
                     fs.stat(__dirname, function(err) {
                         if(err) throw err;
@@ -615,7 +615,7 @@ describe('Stepify', function() {
                             var root = this;
                             fs.readdir(__dirname, function(err) {
                                 if(err) throw err;
-                                root.fulfill(root._task._taskName + '.step1');
+                                root.fulfill(root.taskName + '.step1');
                                 root.done(null);
                             });
                         })
@@ -626,7 +626,7 @@ describe('Stepify', function() {
                         .step(function() {
                             var root = this;
                             setTimeout(function() {
-                                root.fulfill(root._task._taskName + '.step2');
+                                root.fulfill(root.taskName + '.step2');
                                 root.done(null);
                             }, 300);
                         })
@@ -636,7 +636,7 @@ describe('Stepify', function() {
                         .step('timer', function() {
                             var root = this;
                             setTimeout(function() {
-                                root.fulfill(root._task._taskName + '.step2');
+                                root.fulfill(root.taskName + '.step2');
                                 root.done(null);
                             }, 300);
                         })
@@ -653,7 +653,7 @@ describe('Stepify', function() {
                     .sleep(function() {
                         var root = this;
                         setTimeout(function() {
-                            root.fulfill(root._task._taskName + '.sleep');
+                            root.fulfill(root.taskName + '.sleep');
                             root.done(null);
                         }, 200);
                     })
@@ -684,7 +684,7 @@ describe('Stepify', function() {
                             var root = this;
                             fs.readdir(__dirname, function(err) {
                                 if(err) throw err;
-                                root.fulfill(root._task._taskName + '.step1');
+                                root.fulfill(root.taskName + '.step1');
                                 root.done(null);
                             });
                         })
@@ -695,7 +695,7 @@ describe('Stepify', function() {
                         .step(function() {
                             var root = this;
                             setTimeout(function() {
-                                root.fulfill(root._task._taskName + '.step2');
+                                root.fulfill(root.taskName + '.step2');
                                 root.done(null);
                             }, 300);
                         })
@@ -705,7 +705,7 @@ describe('Stepify', function() {
                         .step('timer', function() {
                             var root = this;
                             setTimeout(function() {
-                                root.fulfill(root._task._taskName + '.step2');
+                                root.fulfill(root.taskName + '.step2');
                                 root.done(null);
                             }, 300);
                         })
@@ -722,7 +722,7 @@ describe('Stepify', function() {
                     .sleep(function() {
                         var root = this;
                         setTimeout(function() {
-                            root.fulfill(root._task._taskName + '.sleep');
+                            root.fulfill(root.taskName + '.sleep');
                             root.done(null);
                         }, 200);
                     })
