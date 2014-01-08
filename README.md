@@ -443,9 +443,62 @@ Stepify()
 
 - {Mix} 可选参数，类型可以是字符串（taskName）、数字（task定义的顺序，从0开始）、数组（指定哪些tasks可以并行），也可以混合起来使用（数组不支持嵌套）。默认是按照定义的顺序串行执行所有tasks。
 
-例子（详见[run_mode](https://github.com/chemdemo/node-stepify/blob/master/examples/run_mode.js)）：
+例子：
 
 ``` javascript
+function createTask() {
+    return Stepify()
+        .task('task1')
+            .step(function() {
+                c1++;
+                fs.readdir(__dirname, this.wrap());
+            })
+            .step('sleep')
+            .step('exec', 'cat', __filename)
+        .task('task2')
+            .step('sleep')
+            .step(function() {
+                c2++;
+                var root = this;
+                setTimeout(function() {
+                    root.done(null);
+                }, 1500);
+            })
+            .step('exec', 'ls', '-l')
+        .task('task3')
+            .step('readFile', __filename)
+            .step('timer', function() {
+                c3++;
+                var root = this;
+                setTimeout(function() {
+                    root.done();
+                }, 1000);
+            })
+            .step('sleep')
+            .readFile(function(p) {
+                fs.readFile(p, this.done.bind(this));
+            })
+        .task('task4')
+            .step('sleep')
+            .step(function(p) {
+                c4++;
+                fs.readFile(p, this.wrap());
+            }, __filename)
+        .pend()
+        .sleep(function() {
+            console.log('Task %s sleep.', this._taskName);
+            var root = this;
+            setTimeout(function() {
+                root.done(null);
+            }, 2000);
+        })
+        .exec(function(cmd, args) {
+            cmd = [].slice.call(arguments, 0);
+            var root = this;
+            exec(cmd.join(' '), this.wrap());
+        });
+};
+
 var modes = {
     'Default(serial)': [], // 10621 ms.
     'Customized-serial': ['task1', 'task3', 'task4', 'task2'], // 10624 ms.
@@ -456,10 +509,26 @@ var modes = {
     'Part-of': ['task2', 'task4'] // 5526 ms.
 };
 
-Object.keys(modes).forEach(function(mode) {
-    task = createTask();
-    task.run.apply(task, modes[mode]);
-});
+var test = function() {
+    var t = Date.now();
+    var task;
+
+    Object.keys(modes).forEach(function(mode) {
+        task = createTask();
+
+        task.result = function() {
+            console.log(mode + ' mode finished and took %d ms.', Date.now() - t);
+        };
+
+        task.run.apply(task, modes[mode]);
+    });
+
+    setTimeout(function() {
+        log(c1, c2, c3 ,c4); // [6, 7, 6, 7]
+    }, 15000);
+};
+
+test();
 ```
 
 ---------
