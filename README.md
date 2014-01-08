@@ -666,7 +666,7 @@ Stepify()
 
 #### parallel()
 
-描述：简单的并发支持。*在step内部，如遇到parallel无法支持到的情况，可尝试配合其他库完成并行任务。*
+描述：简单的并发支持。*这里如有必要可以尝试引用其他模块（如：[async](https://github.com/caolan/async)）完成并行任务。*
 
 调用：parallel(arr[, iterator, *args, callback])
 
