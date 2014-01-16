@@ -6,7 +6,7 @@ stepify是一个简单易用的Node.js异步流程控制库，提供一种比较
 
 目标是将复杂的任务进行拆分成多步完成，使得每一步的执行过程更加透明，化繁为简。
 
-stepify侧重流程控制，甚至可以和其他异步类库配合使用。
+stepify侧重流程控制，和目前常用的一些处理异步编程的模块并不冲突，**详情请阅读[这篇文章](https://github.com/chemdemo/chemdemo.github.io/blob/master/blogs/stepify.md)**。
 
 ## stepify特点
 
