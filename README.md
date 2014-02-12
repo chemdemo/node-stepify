@@ -768,7 +768,7 @@ Stepify()
 
 描述：在step之间跳转。**这样会打乱step的执行顺序，谨慎使用jump，以免导致死循环**。
 
-调用：jump(index|stepName)
+调用：jump(index|stepName[, args])
 
 参数：
 
@@ -790,7 +790,7 @@ Stepify()
             this.next();
         }
 
-        // 其他的异步操作
+        // do some stuff ...
     })
     .step('c', fn)
     .run();
