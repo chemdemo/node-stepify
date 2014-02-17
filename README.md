@@ -2,11 +2,11 @@
 [![Build Status](https://api.travis-ci.org/chemdemo/node-stepify.png)](http://travis-ci.org/chemdemo/node-stepify)
 [![NPM version](https://badge.fury.io/js/stepify.png)](https://npmjs.org/package/stepify)
 
-stepify是一个简单易用的Node.js异步流程控制库，提供一种比较灵活的方式完成Node.js（多）任务。
+stepify是一个简单易扩展的Node.js流程控制引擎，采用方法链（methods chain）的方式定制异步任务，使得Node.js工作流易于理解和维护。
 
 目标是将复杂的任务进行拆分成多步完成，使得每一步的执行过程更加透明，化繁为简。
 
-stepify侧重流程控制，和目前常用的一些处理异步编程的模块并不冲突，**详情请阅读[这篇文章](https://github.com/chemdemo/chemdemo.github.io/blob/master/blogs/stepify.md)**。
+**详细介绍请阅读[这篇文章](https://github.com/chemdemo/chemdemo.github.io/blob/master/blogs/stepify.md)**。
 
 ## stepify特点
 
