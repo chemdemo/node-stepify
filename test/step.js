@@ -124,7 +124,7 @@ describe('Step', function() {
                     fs.readdir(__dirname, this.wrap());
                 })
                 .step(function(list) {
-                    list.should.eql(fs.readdirSync(__dirname));
+                    list.sort().should.eql(fs.readdirSync(__dirname).sort());
                     fs.readFile(__filename, this.wrap());
                 })
                 .step(function(fileStr) {
@@ -169,7 +169,7 @@ describe('Step', function() {
                         var root = this;
                         fs.readdir(__dirname, function(err, list) {
                             if(err) root.done(err);
-                            root.fulfill(list);
+                            root.fulfill(list.sort());
                             root.done();
                         });
                     })
@@ -181,7 +181,7 @@ describe('Step', function() {
                         {
                             __filename: fs.readFileSync(__filename).toString()
                         },
-                        fs.readdirSync(__dirname)
+                        fs.readdirSync(__dirname).sort()
                     ]);
                     done();
                 })
